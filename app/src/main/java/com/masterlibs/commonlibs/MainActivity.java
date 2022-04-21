@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.common.control.dialog.PermissionStorageDialog;
+import com.common.control.interfaces.PermissionCallback;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -14,11 +18,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d("android_log", "onCreate: MainActivity");
         setContentView(R.layout.activity_main);
-        Button button=findViewById(R.id.bt_start);
+        Button button = findViewById(R.id.bt_start);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SecondScreenActivity.start(MainActivity.this);
+                PermissionStorageDialog.start(MainActivity.this, new PermissionCallback() {
+                    @Override
+                    public void onPermissionGranted() {
+                        Toast.makeText(MainActivity.this, "onPermissionGranted", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onPermissionDenied() {
+                        Toast.makeText(MainActivity.this, "onPermissionDenied", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }

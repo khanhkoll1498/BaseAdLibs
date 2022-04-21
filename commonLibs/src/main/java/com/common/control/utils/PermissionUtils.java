@@ -15,23 +15,19 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 
 import com.common.control.R;
-import com.common.control.dialog.PermissionNormalDialog;
-import com.common.control.dialog.PermissionStorageDialog;
-import com.common.control.interfaces.PermissionCallback;
 
 
 public class PermissionUtils {
-    private static final String[] PERMISSIONS_STORAGE = {
+    public static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
-    private static final int RQC_REQUEST_PERMISSION_ANDROID_11 = 51233;
+    public static final int RQC_REQUEST_PERMISSION_ANDROID_11 = 51233;
     public static final int RQC_REQUEST_PERMISSION_ANDROID_BELOW = 53233;
-    private static PermissionUtils instance;
-    private PermissionCallback permissionCallback;
+    private static final int REQUEST_PERMISSION_ANY = 100225;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public static void showDialogPermission(Context context) {
+    public static void showDefaultPermissionDialog(Context context) {
         new AlertDialog.Builder(context)
                 .setTitle(R.string.pl_grant_permission)
                 .setMessage(R.string.pl_grant_permission_desc)
@@ -51,71 +47,10 @@ public class PermissionUtils {
                 .show();
     }
 
-    public void setPermissionCallback(PermissionCallback permissionCallback) {
-        this.permissionCallback = permissionCallback;
-    }
 
-    public static PermissionUtils instance() {
-        if (instance == null) {
-            instance = new PermissionUtils();
-        }
-        return instance;
-    }
-
-
-    public PermissionCallback getPermissionCallback() {
-        return permissionCallback;
-    }
-
-    public void requestPermission(Activity activity) {
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                activity.requestPermissions(PERMISSIONS_STORAGE, RQC_REQUEST_PERMISSION_ANDROID_BELOW);
-            }
-//            ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, RQC_REQUEST_PERMISSION_ANDROID_BELOW);
-            return;
-        }
-
-        try {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-            intent.addCategory("android.intent.category.DEFAULT");
-            intent.setData(Uri.parse(String.format("package:%s", activity.getPackageName())));
-            activity.startActivityForResult(intent, RQC_REQUEST_PERMISSION_ANDROID_11);
-        } catch (Exception e) {
-            Intent intent = new Intent();
-            intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-            activity.startActivityForResult(intent, RQC_REQUEST_PERMISSION_ANDROID_11);
-        }
-    }
-
-    public void showPermissionStorageDialog(Activity activity, String content, PermissionCallback permissionCallback) {
-        this.permissionCallback = permissionCallback;
-
-        if (isStoragePermissionGranted(activity)) {
-            this.permissionCallback.onPermissionGranted();
-            return;
-        }
-        this.permissionCallback.onPermissionNotGranted();
-
-        PermissionStorageDialog.show(activity, content);
-    }
-
-    public void showPermissionNormalDialog(Activity activity, PermissionCallback permissionCallback, String... permissions) {
-        this.permissionCallback = permissionCallback;
-
-        if (permissionGranted(activity, permissions)) {
-            this.permissionCallback.onPermissionGranted();
-            return;
-        }
-        this.permissionCallback.onPermissionNotGranted();
-
-        PermissionNormalDialog.show(activity, permissions);
-    }
-
-    public void requestPermission(Activity activity, String... permission) {
+    public static void requestPermission(Activity activity, String... permission) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            activity.requestPermissions(permission, 1);
+            activity.requestPermissions(permission, REQUEST_PERMISSION_ANY);
         }
     }
 
@@ -131,19 +66,6 @@ public class PermissionUtils {
         return true;
     }
 
-    public void onActivityResult(Activity activity, int requestCode) {
-        if (permissionCallback == null) {
-            return;
-        }
-        if (requestCode == RQC_REQUEST_PERMISSION_ANDROID_11
-                || requestCode == RQC_REQUEST_PERMISSION_ANDROID_BELOW) {
-            if (isStoragePermissionGranted(activity)) {
-                permissionCallback.onPermissionGranted();
-            } else {
-                permissionCallback.onPermissionDenied();
-            }
-        }
-    }
 
     public static boolean isStoragePermissionGranted(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

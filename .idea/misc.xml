@@ -9,7 +9,8 @@
         <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/drawable/bg_card_ads.xml" value="0.14322916666666666" />
         <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/drawable/bg_edit_feedback.xml" value="0.26614583333333336" />
         <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/drawable/ic_close.xml" value="0.26614583333333336" />
-        <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/layout/activity_permission_storage.xml" value="0.4" />
+        <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/layout/activity_permission_normal.xml" value="0.25" />
+        <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/layout/activity_permission_storage.xml" value="0.2" />
         <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/layout/custom_native.xml" value="0.25" />
         <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/layout/dialog_prepair_loading_ads.xml" value="0.25" />
         <entry key="..\:/ATruong/CommonLibs/commonLibs/src/main/res/layout/dialog_rate.xml" value="0.25" />

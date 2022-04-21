@@ -11,7 +11,7 @@
             android:launchMode="singleTask"
             android:theme="@style/Transparent" />
         <activity
-            android:name=".dialog.PermissionNormalDialog"
+            android:name=".dialog.PermissionSystemDialog"
             android:launchMode="singleTask"
             android:theme="@style/Transparent" />
 
