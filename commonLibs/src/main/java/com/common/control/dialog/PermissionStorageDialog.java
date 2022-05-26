@@ -37,7 +37,9 @@ public class PermissionStorageDialog extends AppCompatActivity implements View.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permission_storage);
         if (PermissionUtils.isStoragePermissionGranted(this)) {
-            callback.onPermissionGranted();
+            if (callback != null) {
+                callback.onPermissionGranted();
+            }
             finish();
             return;
         }
@@ -53,7 +55,9 @@ public class PermissionStorageDialog extends AppCompatActivity implements View.O
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.bt_deny) {
-            callback.onPermissionDenied();
+            if (callback != null) {
+                callback.onPermissionDenied();
+            }
             finish();
             return;
         }
