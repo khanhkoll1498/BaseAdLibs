@@ -87,21 +87,27 @@ public class AdmobManager {
 
     public void loadInterAds(Activity context, String id, AdCallback callback) {
         if (PurchaseManager.getInstance().isPremium(context)) {
-            callback.onAdFailedToLoad(null);
+            if (callback != null) {
+                callback.onAdFailedToLoad(null);
+            }
             return;
         }
         InterstitialAd.load(context, id, getAdRequest(), new InterstitialAdLoadCallback() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 super.onAdFailedToLoad(loadAdError);
-                callback.onAdFailedToLoad(loadAdError);
+                if (callback != null) {
+                    callback.onAdFailedToLoad(loadAdError);
+                }
                 Log.d("TAG2", "onAdFailedToLoad: ");
             }
 
             @Override
             public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                 super.onAdLoaded(interstitialAd);
-                callback.interCallback(interstitialAd);
+                if (callback != null) {
+                    callback.interCallback(interstitialAd);
+                }
                 Log.d("TAG2", "onAdLoaded: ");
             }
         });
@@ -140,7 +146,14 @@ public class AdmobManager {
 
             @Override
             public void onAdFailedToShowFullScreenContent(AdError adError) {
+                if (AppOpenManager.getInstance().isInitialized()) {
+                    AppOpenManager.getInstance().enableAppResume();
+                    Log.d(TAG, "enableAppResume: ");
+                }
                 Log.d("TAG", "The ad failed to show.");
+                if (callback != null) {
+                    callback.onAdFailedToLoad(null);
+                }
             }
 
             @Override
@@ -239,7 +252,7 @@ public class AdmobManager {
         loadNative(context, id, placeHolder, R.layout.custom_native);
     }
 
-    public void loadNative(Context context, String id, FrameLayout frAds, int customNative) {
+    public void loadNative(Context context, String id, FrameLayout placeHolder, int customNative) {
         loadUnifiedNativeAd(context, id, new AdCallback() {
             @Override
             public void onNativeAds(NativeAd nativeAd) {
@@ -250,24 +263,22 @@ public class AdmobManager {
                                 null
                         );
                 populateUnifiedNativeAdView(nativeAd, nativeAdView);
-                frAds.removeAllViews();
-                frAds.addView(nativeAdView);
+                placeHolder.removeAllViews();
+                placeHolder.addView(nativeAdView);
             }
 
             @Override
             public void onAdFailedToLoad(LoadAdError i) {
-                frAds.setVisibility(View.GONE);
+                placeHolder.setVisibility(View.GONE);
             }
         });
     }
 
-    public void getNativeAd(Context context, String id, AdCallback callback) {
-        loadUnifiedNativeAd(context, id, callback);
-    }
-
     private void loadUnifiedNativeAd(Context context, String id, final AdCallback callback) {
+        if (callback == null) {
+            return;
+        }
         if (PurchaseManager.getInstance().isPremium(context)) {
-            callback.onNativeAds(null);
             callback.onAdFailedToLoad(null);
             return;
         }
@@ -283,7 +294,6 @@ public class AdmobManager {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         super.onAdFailedToLoad(loadAdError);
-                        callback.onNativeAds(null);
                         callback.onAdFailedToLoad(loadAdError);
                     }
                 })
@@ -294,25 +304,15 @@ public class AdmobManager {
 
 
     private void populateUnifiedNativeAdView(NativeAd nativeAd, NativeAdView adView) {
-//        MediaView mediaView = adView.findViewById(R.id.ad_media);
-//        adView.setMediaView(mediaView);
-
-        adView.setHeadlineView(adView.findViewById(R.id.ad_headline));
-        adView.setBodyView(adView.findViewById(R.id.ad_body));
-        adView.setCallToActionView(adView.findViewById(R.id.ad_call_to_action));
-        adView.setIconView(adView.findViewById(R.id.ad_app_icon));
-//        adView.setPriceView(adView.findViewById(R.id.ad_price));
-        adView.setStarRatingView(adView.findViewById(R.id.ad_stars));
-//        adView.setStoreView(adView.findViewById(R.id.ad_store));
-        adView.setAdvertiserView(adView.findViewById(R.id.ad_advertiser));
-
         try {
+            adView.setHeadlineView(adView.findViewById(R.id.ad_headline));
             ((TextView) adView.getHeadlineView()).setText(nativeAd.getHeadline());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
+            adView.setBodyView(adView.findViewById(R.id.ad_body));
             if (nativeAd.getBody() == null) {
                 adView.getBodyView().setVisibility(View.INVISIBLE);
             } else {
@@ -324,6 +324,7 @@ public class AdmobManager {
         }
 
         try {
+            adView.setCallToActionView(adView.findViewById(R.id.ad_call_to_action));
             if (nativeAd.getCallToAction() == null) {
                 adView.getCallToActionView().setVisibility(View.INVISIBLE);
             } else {
@@ -335,6 +336,7 @@ public class AdmobManager {
         }
 
         try {
+            adView.setIconView(adView.findViewById(R.id.ad_app_icon));
             if (nativeAd.getIcon() == null) {
                 adView.getIconView().setVisibility(View.GONE);
             } else {
@@ -346,29 +348,30 @@ public class AdmobManager {
             e.printStackTrace();
         }
 
-        try {
-            if (nativeAd.getPrice() == null) {
-                adView.getPriceView().setVisibility(View.INVISIBLE);
-            } else {
-                adView.getPriceView().setVisibility(View.VISIBLE);
-                ((TextView) adView.getPriceView()).setText(nativeAd.getPrice());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            if (nativeAd.getPrice() == null) {
+//                adView.getPriceView().setVisibility(View.INVISIBLE);
+//            } else {
+//                adView.getPriceView().setVisibility(View.VISIBLE);
+//                ((TextView) adView.getPriceView()).setText(nativeAd.getPrice());
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        try {
+//            if (nativeAd.getStore() == null) {
+//                adView.getStoreView().setVisibility(View.INVISIBLE);
+//            } else {
+//                adView.getStoreView().setVisibility(View.VISIBLE);
+//                ((TextView) adView.getStoreView()).setText(nativeAd.getStore());
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         try {
-            if (nativeAd.getStore() == null) {
-                adView.getStoreView().setVisibility(View.INVISIBLE);
-            } else {
-                adView.getStoreView().setVisibility(View.VISIBLE);
-                ((TextView) adView.getStoreView()).setText(nativeAd.getStore());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
+            adView.setStarRatingView(adView.findViewById(R.id.ad_stars));
             if (nativeAd.getStarRating() == null) {
                 adView.getStarRatingView().setVisibility(View.INVISIBLE);
             } else {
@@ -381,6 +384,7 @@ public class AdmobManager {
         }
 
         try {
+            adView.setAdvertiserView(adView.findViewById(R.id.ad_advertiser));
             if (nativeAd.getAdvertiser() == null) {
                 adView.getAdvertiserView().setVisibility(View.GONE);
             } else {
