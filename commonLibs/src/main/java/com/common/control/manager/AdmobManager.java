@@ -49,10 +49,7 @@ public class AdmobManager {
     private static AdmobManager instance;
     private final Handler handler = new Handler();
     private PrepareLoadingAdsDialog dialog;
-
-
-    public void setTimeReloadAds(long timeReloadAds) {
-    }
+    private boolean errorWhenInit;
 
     public static AdmobManager getInstance() {
         if (instance == null) {
@@ -67,11 +64,16 @@ public class AdmobManager {
 
     public void init(Context context, String deviceID) {
         try {
+            if (PurchaseManager.getInstance().isPremium(context)) {
+                errorWhenInit = true;
+                return;
+            }
             MobileAds.initialize(context, initializationStatus -> {
             });
             MobileAds.setRequestConfiguration(new RequestConfiguration.Builder()
                     .setTestDeviceIds(Collections.singletonList(deviceID)).build());
         } catch (Exception e) {
+            errorWhenInit = true;
             e.printStackTrace();
         }
     }
@@ -86,7 +88,7 @@ public class AdmobManager {
     }
 
     public void loadInterAds(Activity context, String id, AdCallback callback) {
-        if (PurchaseManager.getInstance().isPremium(context)) {
+        if (errorWhenInit || PurchaseManager.getInstance().isPremium(context)) {
             if (callback != null) {
                 callback.onAdFailedToLoad(null);
             }
@@ -118,7 +120,7 @@ public class AdmobManager {
     }
 
     private void showInterstitial(final Activity context, final InterstitialAd mInterstitialAd, final AdCallback callback, final boolean shouldReloadAds) {
-        if (PurchaseManager.getInstance().isPremium(context)) {
+        if (errorWhenInit || PurchaseManager.getInstance().isPremium(context)) {
             if (callback != null) {
                 callback.onAdClosed();
             }
@@ -135,6 +137,9 @@ public class AdmobManager {
             public void onAdDismissedFullScreenContent() {
                 // Called when fullscreen content is dismissed.
                 Log.d("TAG", "The ad was dismissed.");
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
                 if (AppOpenManager.getInstance().isInitialized()) {
                     AppOpenManager.getInstance().enableAppResume();
                     Log.d(TAG, "enableAppResume: ");
@@ -149,6 +154,9 @@ public class AdmobManager {
                 if (AppOpenManager.getInstance().isInitialized()) {
                     AppOpenManager.getInstance().enableAppResume();
                     Log.d(TAG, "enableAppResume: ");
+                }
+                if (dialog != null) {
+                    dialog.dismiss();
                 }
                 Log.d("TAG", "The ad failed to show.");
                 if (callback != null) {
@@ -166,21 +174,40 @@ public class AdmobManager {
     }
 
     private void showInterstitialAd(Activity context, final InterstitialAd mInterstitialAd, AdCallback callback) {
+        if (errorWhenInit) {
+            if (callback != null) {
+                callback.onAdFailedToLoad(null);
+            }
+            return;
+        }
         if (ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)
                 && mInterstitialAd != null) {
-//            try {
-//                dialog = new PrepareLoadingAdsDialog(context);
-//                dialog.show();
-//            } catch (Exception e) {
-//                Toast.makeText(context, "error", Toast.LENGTH_SHORT).show();
-//                dialog = null;
-//                e.printStackTrace();
-//            }
+            try {
+                dialog = new PrepareLoadingAdsDialog(context);
+                dialog.show();
+            } catch (Exception e) {
+                dialog = null;
+                e.printStackTrace();
+            }
             if (AppOpenManager.getInstance().isInitialized()) {
                 AppOpenManager.getInstance().disableAppResume();
                 Log.d(TAG, "disableAppResume: ");
             }
-            mInterstitialAd.show(context);
+            if (context == null) {
+                if (callback != null) {
+                    callback.onAdClosed();
+                }
+                return;
+            }
+            new Handler(context.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mInterstitialAd.show(context);
+                    if (dialog != null) {
+                        dialog.clearTextad();
+                    }
+                }
+            }, 1500);
 //            if (dialog != null) {
 //                dialog.dismiss();
 //            }
@@ -198,7 +225,7 @@ public class AdmobManager {
     }
 
     private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, final ShimmerFrameLayout containerShimmer) {
-        if (PurchaseManager.getInstance().isPremium(mActivity)) {
+        if (errorWhenInit || PurchaseManager.getInstance().isPremium(mActivity)) {
             containerShimmer.setVisibility(View.GONE);
             return;
         }
@@ -278,7 +305,7 @@ public class AdmobManager {
         if (callback == null) {
             return;
         }
-        if (PurchaseManager.getInstance().isPremium(context)) {
+        if (errorWhenInit || PurchaseManager.getInstance().isPremium(context)) {
             callback.onAdFailedToLoad(null);
             return;
         }

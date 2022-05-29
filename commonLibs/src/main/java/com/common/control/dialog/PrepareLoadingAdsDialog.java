@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import com.common.control.R;
 
@@ -21,7 +22,8 @@ public class PrepareLoadingAdsDialog extends Dialog {
         setContentView(R.layout.dialog_prepair_loading_ads);
     }
 
-    public void hideLoadingAdsText() {
-        findViewById(R.id.loading_dialog_tv).setVisibility(View.INVISIBLE);
+    public void clearTextad() {
+        TextView tvLoading = findViewById(R.id.loading_dialog_tv);
+        tvLoading.setText("Loading...");
     }
 }
