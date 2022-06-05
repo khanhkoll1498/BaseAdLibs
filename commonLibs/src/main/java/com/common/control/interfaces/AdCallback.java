@@ -1,5 +1,7 @@
 package com.common.control.interfaces;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.formats.UnifiedNativeAd;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
@@ -12,32 +14,18 @@ abstract public class AdCallback {
     public void onAdClosed() {
     }
 
-    public void onAdFailedToLoad(int i) {
-    }
 
-    public void onAdFailedToLoad(LoadAdError i) {
-    }
-
-    public void onAdLeftApplication() {
-    }
-
-    public void onAdOpened() {
+    public void onAdFailedToLoad(@NonNull LoadAdError i) {
     }
 
     public void onAdLoaded() {
     }
 
-    public void onAdClicked() {
-    }
-
-    public void onAdImpression() {
-    }
-
+    @Deprecated
     public void interCallback(InterstitialAd interstitialAd) {
     }
 
-    public void onUnifiedNativeAdLoaded(UnifiedNativeAd unifiedNativeAd) {
-
+    public void onResultInterstitialAd(InterstitialAd interstitialAd) {
     }
 
     public void onNativeAds(NativeAd nativeAd) {

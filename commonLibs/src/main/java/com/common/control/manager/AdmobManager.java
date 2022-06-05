@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +48,19 @@ public class AdmobManager {
     private static AdmobManager instance;
     private final Handler handler = new Handler();
     private PrepareLoadingAdsDialog dialog;
-    private boolean errorWhenInit;
+    private boolean hasAds = true;
+    private final LoadAdError errAd = new LoadAdError(2, "No Ad", "", null, null);
+    private boolean isShowLoadingDialog;
+    private long customTimeLoadingDialog = 1500;
+
+    public void setCustomTimeLoadingDialog(long customTimeLoadingDialog) {
+        this.customTimeLoadingDialog = customTimeLoadingDialog;
+    }
+
+    public void setShowLoadingDialog(boolean showLoadingDialog) {
+        isShowLoadingDialog = showLoadingDialog;
+    }
+
 
     public static AdmobManager getInstance() {
         if (instance == null) {
@@ -64,21 +75,19 @@ public class AdmobManager {
 
     public void init(Context context, String deviceID) {
         try {
-            if (PurchaseManager.getInstance().isPremium(context)) {
-                errorWhenInit = true;
-                return;
-            }
             MobileAds.initialize(context, initializationStatus -> {
             });
             MobileAds.setRequestConfiguration(new RequestConfiguration.Builder()
                     .setTestDeviceIds(Collections.singletonList(deviceID)).build());
         } catch (Exception e) {
-            errorWhenInit = true;
             e.printStackTrace();
         }
     }
 
     public AdRequest getAdRequest() {
+        if (!hasAds) {
+            return null;
+        }
         AdRequest.Builder builder = new AdRequest.Builder();
         return builder.build();
     }
@@ -88,20 +97,18 @@ public class AdmobManager {
     }
 
     public void loadInterAds(Activity context, String id, AdCallback callback) {
-        if (errorWhenInit || PurchaseManager.getInstance().isPremium(context)) {
-            if (callback != null) {
-                callback.onAdFailedToLoad(null);
-            }
+        AdRequest request = getAdRequest();
+        if (request == null) {
+            callback.onAdFailedToLoad(errAd);
             return;
         }
-        InterstitialAd.load(context, id, getAdRequest(), new InterstitialAdLoadCallback() {
+        InterstitialAd.load(context, id, request, new InterstitialAdLoadCallback() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 super.onAdFailedToLoad(loadAdError);
                 if (callback != null) {
                     callback.onAdFailedToLoad(loadAdError);
                 }
-                Log.d("TAG2", "onAdFailedToLoad: ");
             }
 
             @Override
@@ -109,40 +116,30 @@ public class AdmobManager {
                 super.onAdLoaded(interstitialAd);
                 if (callback != null) {
                     callback.interCallback(interstitialAd);
+                    callback.onResultInterstitialAd(interstitialAd);
                 }
-                Log.d("TAG2", "onAdLoaded: ");
             }
         });
     }
 
-    public void showInterstitial(final Activity context, final InterstitialAd mInterstitialAd, final AdCallback callback) {
-        showInterstitial(context, mInterstitialAd, callback, true);
-    }
 
-    private void showInterstitial(final Activity context, final InterstitialAd mInterstitialAd, final AdCallback callback, final boolean shouldReloadAds) {
-        if (errorWhenInit || PurchaseManager.getInstance().isPremium(context)) {
+    public void showInterstitial(final Activity context, final InterstitialAd mInterstitialAd, final AdCallback callback) {
+        if (!hasAds || mInterstitialAd == null) {
             if (callback != null) {
-                callback.onAdClosed();
+                callback.onAdFailedToLoad(errAd);
             }
             return;
         }
-        if (mInterstitialAd == null) {
-            if (callback != null) {
-                callback.onAdFailedToLoad(null);
-            }
-            return;
-        }
+
         mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
             public void onAdDismissedFullScreenContent() {
-                // Called when fullscreen content is dismissed.
-                Log.d("TAG", "The ad was dismissed.");
                 if (dialog != null) {
                     dialog.dismiss();
+                    dialog = null;
                 }
                 if (AppOpenManager.getInstance().isInitialized()) {
                     AppOpenManager.getInstance().enableAppResume();
-                    Log.d(TAG, "enableAppResume: ");
                 }
                 if (callback != null) {
                     callback.onAdClosed();
@@ -153,20 +150,19 @@ public class AdmobManager {
             public void onAdFailedToShowFullScreenContent(AdError adError) {
                 if (AppOpenManager.getInstance().isInitialized()) {
                     AppOpenManager.getInstance().enableAppResume();
-                    Log.d(TAG, "enableAppResume: ");
                 }
                 if (dialog != null) {
                     dialog.dismiss();
+                    dialog = null;
                 }
-                Log.d("TAG", "The ad failed to show.");
                 if (callback != null) {
-                    callback.onAdFailedToLoad(null);
+                    callback.onAdFailedToLoad(errAd);
                 }
             }
 
             @Override
             public void onAdShowedFullScreenContent() {
-                Log.d("TAG", "The ad was shown.");
+
             }
         });
 
@@ -174,24 +170,22 @@ public class AdmobManager {
     }
 
     private void showInterstitialAd(Activity context, final InterstitialAd mInterstitialAd, AdCallback callback) {
-        if (errorWhenInit) {
-            if (callback != null) {
-                callback.onAdFailedToLoad(null);
-            }
-            return;
-        }
         if (ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)
                 && mInterstitialAd != null) {
-            try {
-                dialog = new PrepareLoadingAdsDialog(context);
-                dialog.show();
-            } catch (Exception e) {
-                dialog = null;
-                e.printStackTrace();
+            long timeShowLoadingDlg = 0;
+            if (isShowLoadingDialog) {
+                try {
+                    dialog = new PrepareLoadingAdsDialog(context);
+                    dialog.show();
+                    timeShowLoadingDlg = customTimeLoadingDialog;
+                } catch (Exception e) {
+                    dialog = null;
+                    e.printStackTrace();
+                }
             }
+
             if (AppOpenManager.getInstance().isInitialized()) {
                 AppOpenManager.getInstance().disableAppResume();
-                Log.d(TAG, "disableAppResume: ");
             }
             if (context == null) {
                 if (callback != null) {
@@ -199,18 +193,15 @@ public class AdmobManager {
                 }
                 return;
             }
-            new Handler(context.getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mInterstitialAd.show(context);
+
+            new Handler(context.getMainLooper()).postDelayed(() -> {
+                mInterstitialAd.show(context);
+                new Handler(context.getMainLooper()).postDelayed(() -> {
                     if (dialog != null) {
                         dialog.clearTextad();
                     }
-                }
-            }, 1500);
-//            if (dialog != null) {
-//                dialog.dismiss();
-//            }
+                }, 300);
+            }, timeShowLoadingDlg);
         } else {
             if (callback != null) {
                 callback.onAdClosed();
@@ -225,11 +216,12 @@ public class AdmobManager {
     }
 
     private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, final ShimmerFrameLayout containerShimmer) {
-        if (errorWhenInit || PurchaseManager.getInstance().isPremium(mActivity)) {
+        AdRequest request = getAdRequest();
+        if (request == null) {
+            adContainer.setVisibility(View.GONE);
             containerShimmer.setVisibility(View.GONE);
             return;
         }
-        containerShimmer.setVisibility(View.VISIBLE);
         containerShimmer.startShimmer();
         try {
             AdView adView = new AdView(mActivity);
@@ -238,7 +230,7 @@ public class AdmobManager {
             AdSize adSize = getAdSize(mActivity);
             adView.setAdSize(adSize);
             adView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            adView.loadAd(getAdRequest());
+            adView.loadAd(request);
             adView.setAdListener(new AdListener() {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -295,18 +287,16 @@ public class AdmobManager {
             }
 
             @Override
-            public void onAdFailedToLoad(LoadAdError i) {
+            public void onAdFailedToLoad(@NonNull LoadAdError i) {
                 placeHolder.setVisibility(View.GONE);
             }
         });
     }
 
     private void loadUnifiedNativeAd(Context context, String id, final AdCallback callback) {
-        if (callback == null) {
-            return;
-        }
-        if (errorWhenInit || PurchaseManager.getInstance().isPremium(context)) {
-            callback.onAdFailedToLoad(null);
+        AdRequest request = getAdRequest();
+        if (request == null) {
+            callback.onAdFailedToLoad(errAd);
             return;
         }
         VideoOptions videoOptions = new VideoOptions.Builder()
@@ -316,17 +306,23 @@ public class AdmobManager {
                 .setVideoOptions(videoOptions)
                 .build();
         AdLoader adLoader = new AdLoader.Builder(context, id)
-                .forNativeAd(callback::onNativeAds)
+                .forNativeAd(nativeAd -> {
+                    if (callback != null) {
+                        callback.onNativeAds(nativeAd);
+                    }
+                })
                 .withAdListener(new AdListener() {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         super.onAdFailedToLoad(loadAdError);
-                        callback.onAdFailedToLoad(loadAdError);
+                        if (callback != null) {
+                            callback.onAdFailedToLoad(loadAdError);
+                        }
                     }
                 })
                 .withNativeAdOptions(adOptions)
                 .build();
-        adLoader.loadAd(getAdRequest());
+        adLoader.loadAd(request);
     }
 
 
@@ -457,5 +453,9 @@ public class AdmobManager {
 
     public void isPurchased(boolean purchased) {
         PurchaseManager.getInstance().setPurchased(purchased);
+    }
+
+    public void hasAds(boolean hasAds) {
+        this.hasAds = hasAds;
     }
 }

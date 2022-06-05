@@ -41,10 +41,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+
+    private void loadInter() {
         AdmobManager.getInstance().loadInterAds(this, "ca-app-pub-3940256099942544/8691691433", new AdCallback() {
             @Override
-            public void interCallback(InterstitialAd interstitialAd) {
-                super.interCallback(interstitialAd);
+            public void onResultInterstitialAd(InterstitialAd interstitialAd) {
+                super.onResultInterstitialAd(interstitialAd);
                 AdmobManager.getInstance().showInterstitial(MainActivity.this, interstitialAd, this);
             }
 
@@ -78,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d("android_log", "onResume: MainActivity");
+        loadInter();
+
     }
 
     @Override

@@ -10,17 +10,25 @@ import com.common.control.manager.PurchaseManager;
 public abstract class MyApplication extends Application {
 
     @Override
-    public void onCreate() {
+    public final void onCreate() {
         super.onCreate();
+
         AdmobManager.getInstance().init(this, isShowAdsTest() ? AdmobManager.getInstance().getDeviceId(this) : "");
-        AdmobManager.getInstance().isPurchased(isPurchased());
+        AdmobManager.getInstance().hasAds(hasAds());
         if (enableAdsResume()) {
             AppOpenManager.getInstance().init(this, getOpenAppAdId());
         }
-        PurchaseManager.getInstance().initBilling(this);
+        AdmobManager.getInstance().setShowLoadingDialog(isShowDialogLoadingAd());
+        onApplicationCreate();
+//        PurchaseManager.getInstance().initBilling(this);
     }
 
-    protected abstract boolean isPurchased();
+
+    protected abstract void onApplicationCreate();
+
+    protected abstract boolean hasAds();
+
+    protected abstract boolean isShowDialogLoadingAd();
 
     protected abstract boolean isShowAdsTest();
 
