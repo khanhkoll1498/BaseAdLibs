@@ -3,6 +3,7 @@ package com.common.control.manager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -44,10 +45,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 
 public class AdmobManager {
-    private static final String TAG = AdmobManager.class.getName();
     private static AdmobManager instance;
-    private final Handler handler = new Handler();
-    private PrepareLoadingAdsDialog dialog;
     private boolean hasAds = true;
     private final LoadAdError errAd = new LoadAdError(2, "No Ad", "", null, null);
     private boolean isShowLoadingDialog;
@@ -92,10 +90,6 @@ public class AdmobManager {
         return builder.build();
     }
 
-    public void destroyTimeout() {
-        handler.removeCallbacksAndMessages(null);
-    }
-
     public void loadInterAds(Activity context, String id, AdCallback callback) {
         AdRequest request = getAdRequest();
         if (request == null) {
@@ -134,10 +128,7 @@ public class AdmobManager {
         mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
             public void onAdDismissedFullScreenContent() {
-                if (dialog != null) {
-                    dialog.dismiss();
-                    dialog = null;
-                }
+                context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
                 if (AppOpenManager.getInstance().isInitialized()) {
                     AppOpenManager.getInstance().enableAppResume();
                 }
@@ -151,10 +142,7 @@ public class AdmobManager {
                 if (AppOpenManager.getInstance().isInitialized()) {
                     AppOpenManager.getInstance().enableAppResume();
                 }
-                if (dialog != null) {
-                    dialog.dismiss();
-                    dialog = null;
-                }
+                context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
                 if (callback != null) {
                     callback.onAdFailedToLoad(errAd);
                 }
@@ -162,7 +150,7 @@ public class AdmobManager {
 
             @Override
             public void onAdShowedFullScreenContent() {
-
+                context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
             }
         });
 
@@ -174,14 +162,8 @@ public class AdmobManager {
                 && mInterstitialAd != null) {
             long timeShowLoadingDlg = 0;
             if (isShowLoadingDialog) {
-                try {
-                    dialog = new PrepareLoadingAdsDialog(context);
-                    dialog.show();
-                    timeShowLoadingDlg = customTimeLoadingDialog;
-                } catch (Exception e) {
-                    dialog = null;
-                    e.printStackTrace();
-                }
+                PrepareLoadingAdsDialog.start(context);
+                timeShowLoadingDlg = customTimeLoadingDialog;
             }
 
             if (AppOpenManager.getInstance().isInitialized()) {
@@ -197,9 +179,7 @@ public class AdmobManager {
             new Handler(context.getMainLooper()).postDelayed(() -> {
                 mInterstitialAd.show(context);
                 new Handler(context.getMainLooper()).postDelayed(() -> {
-                    if (dialog != null) {
-                        dialog.clearTextad();
-                    }
+                    context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_CLEAR_TEXT_AD));
                 }, 300);
             }, timeShowLoadingDlg);
         } else {

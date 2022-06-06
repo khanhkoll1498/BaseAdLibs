@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResultInterstitialAd(InterstitialAd interstitialAd) {
                 super.onResultInterstitialAd(interstitialAd);
+                startActivity(new Intent(MainActivity.this, SecondScreenActivity.class));
                 AdmobManager.getInstance().showInterstitial(MainActivity.this, interstitialAd, this);
             }
 
@@ -61,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onAdClosed() {
                 super.onAdClosed();
-                startActivity(new Intent(MainActivity.this, SecondScreenActivity.class));
             }
         });
     }
