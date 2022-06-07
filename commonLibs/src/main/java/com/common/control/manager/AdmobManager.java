@@ -150,6 +150,7 @@ public class AdmobManager {
 
             @Override
             public void onAdShowedFullScreenContent() {
+                context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
                 if (callback != null) {
                     callback.onAdShowedFullScreenContent();
                 }
@@ -160,29 +161,18 @@ public class AdmobManager {
     }
 
     private void showInterstitialAd(Activity context, final InterstitialAd mInterstitialAd, AdCallback callback) {
-        if (!context.isDestroyed() && ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)
+        if (context != null && !context.isDestroyed() && ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)
                 && mInterstitialAd != null) {
             long timeShowLoadingDlg = 0;
             if (isShowLoadingDialog) {
                 PrepareLoadingAdsDialog.start(context);
                 timeShowLoadingDlg = customTimeLoadingDialog;
             }
-
             if (AppOpenManager.getInstance().isInitialized()) {
                 AppOpenManager.getInstance().disableAppResume();
             }
-            if (context == null) {
-                if (callback != null) {
-                    callback.onAdClosed();
-                }
-                return;
-            }
-
             new Handler().postDelayed(() -> {
                 mInterstitialAd.show(context);
-                new Handler().postDelayed(() -> {
-                    context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_CLEAR_TEXT_AD));
-                }, 300);
             }, timeShowLoadingDlg);
         } else {
             if (callback != null) {
