@@ -14,7 +14,7 @@ abstract public class AdCallback {
     public void onAdClosed() {
     }
 
-    public void onAdShowed() {
+    public void onAdShowedFullScreenContent() {
     }
 
 
@@ -32,6 +32,10 @@ abstract public class AdCallback {
     }
 
     public void onNativeAds(NativeAd nativeAd) {
+
+    }
+
+    public void onAdFailedToShowFullScreenContent(LoadAdError errAd) {
 
     }
 }

@@ -144,14 +144,14 @@ public class AdmobManager {
                 }
                 context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
                 if (callback != null) {
-                    callback.onAdFailedToLoad(errAd);
+                    callback.onAdFailedToShowFullScreenContent(errAd);
                 }
             }
 
             @Override
             public void onAdShowedFullScreenContent() {
                 if (callback != null) {
-                    callback.onAdShowed();
+                    callback.onAdShowedFullScreenContent();
                 }
             }
         });
