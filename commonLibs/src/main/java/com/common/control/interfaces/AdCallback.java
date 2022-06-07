@@ -14,6 +14,9 @@ abstract public class AdCallback {
     public void onAdClosed() {
     }
 
+    public void onAdShowed() {
+    }
+
 
     public void onAdFailedToLoad(@NonNull LoadAdError i) {
     }
