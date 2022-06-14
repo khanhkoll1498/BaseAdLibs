@@ -300,6 +300,12 @@ public class AdmobManager {
 
     private void populateUnifiedNativeAdView(NativeAd nativeAd, NativeAdView adView) {
         try {
+            adView.setMediaView(adView.findViewById(R.id.ad_media));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
             adView.setHeadlineView(adView.findViewById(R.id.ad_headline));
             ((TextView) adView.getHeadlineView()).setText(nativeAd.getHeadline());
         } catch (Exception e) {

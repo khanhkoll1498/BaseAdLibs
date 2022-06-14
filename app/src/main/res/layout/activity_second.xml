@@ -3,5 +3,10 @@
     android:layout_width="match_parent"
     android:background="#FF5722"
     android:layout_height="match_parent">
+<FrameLayout
+    android:id="@+id/fr_ad"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
+</FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
