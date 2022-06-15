@@ -8,15 +8,19 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.common.control.manager.AdmobManager;
+
 public class SecondScreenActivity extends AppCompatActivity {
     public static void start(Context context) {
         Intent starter = new Intent(context, SecondScreenActivity.class);
         context.startActivity(starter);
     }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
+        AdmobManager.getInstance().loadNative(this, "ca-app-pub-3940256099942544/2247696110", findViewById(R.id.fr_ad), R.layout.custom_native_media);
         Log.d("android_log", "onCreate: SecondScreenActivity");
     }
 
