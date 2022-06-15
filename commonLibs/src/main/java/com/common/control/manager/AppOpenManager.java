@@ -37,7 +37,7 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
 
     private Application myApplication;
 
-    private static boolean isShowingAd = false;
+    private boolean isShowingAd = false;
 
     private boolean isInitialized = false;
     private boolean isAppResumeEnabled = true;
@@ -45,6 +45,38 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
     private final List<Class> disabledAppOpenList;
     private long loadTime;
 
+
+    public AppOpenAd getAppResumeAd() {
+        return appResumeAd;
+    }
+
+    public String getAppResumeAdId() {
+        return appResumeAdId;
+    }
+
+    public Activity getCurrentActivity() {
+        return currentActivity;
+    }
+
+    public Application getMyApplication() {
+        return myApplication;
+    }
+
+    public boolean isShowingOpenAd() {
+        return isShowingAd;
+    }
+
+    public boolean isAppResumeEnabled() {
+        return isAppResumeEnabled;
+    }
+
+    public List<Class> getDisabledAppOpenList() {
+        return disabledAppOpenList;
+    }
+
+    public long getLoadTime() {
+        return loadTime;
+    }
 
     private AppOpenManager() {
         disabledAppOpenList = new ArrayList<>();
