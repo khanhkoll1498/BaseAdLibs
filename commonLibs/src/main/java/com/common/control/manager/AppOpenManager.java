@@ -197,7 +197,7 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
     }
 
     public void showAdIfAvailable() {
-        if (currentActivity != null && PurchaseManager.getInstance().isPremium(currentActivity)) {
+        if (currentActivity != null && !AdmobManager.getInstance().isHasAds()) {
             return;
         }
 

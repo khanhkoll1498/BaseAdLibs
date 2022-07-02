@@ -51,6 +51,10 @@ public class AdmobManager {
     private boolean isShowLoadingDialog;
     private long customTimeLoadingDialog = 1500;
 
+    public boolean isHasAds() {
+        return hasAds;
+    }
+
     public void setCustomTimeLoadingDialog(long customTimeLoadingDialog) {
         this.customTimeLoadingDialog = customTimeLoadingDialog;
     }
@@ -429,9 +433,6 @@ public class AdmobManager {
         return "";
     }
 
-    public void isPurchased(boolean purchased) {
-        PurchaseManager.getInstance().setPurchased(purchased);
-    }
 
     public void hasAds(boolean hasAds) {
         this.hasAds = hasAds;

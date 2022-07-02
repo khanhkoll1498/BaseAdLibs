@@ -4,7 +4,6 @@ import android.app.Application;
 
 import com.common.control.manager.AdmobManager;
 import com.common.control.manager.AppOpenManager;
-import com.common.control.manager.PurchaseManager;
 
 
 public abstract class MyApplication extends Application {
