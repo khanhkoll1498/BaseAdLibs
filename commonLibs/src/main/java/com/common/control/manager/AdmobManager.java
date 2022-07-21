@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
+import com.common.control.BuildConfig;
 import com.common.control.R;
 import com.common.control.dialog.PrepareLoadingAdsDialog;
 import com.common.control.interfaces.AdCallback;
@@ -63,7 +65,6 @@ public class AdmobManager {
         isShowLoadingDialog = showLoadingDialog;
     }
 
-
     public static AdmobManager getInstance() {
         if (instance == null) {
             instance = new AdmobManager();
@@ -77,6 +78,7 @@ public class AdmobManager {
 
     public void init(Context context, String deviceID) {
         try {
+            Log.d("android_log", "init: Admob");
             MobileAds.initialize(context, initializationStatus -> {
             });
             MobileAds.setRequestConfiguration(new RequestConfiguration.Builder()
@@ -95,6 +97,9 @@ public class AdmobManager {
     }
 
     public void loadInterAds(Activity context, String id, AdCallback callback) {
+        if (BuildConfig.DEBUG) {
+            Log.d("android_log", "Request inter: " + id);
+        }
         AdRequest request = getAdRequest();
         if (request == null) {
             callback.onAdFailedToLoad(errAd);
@@ -128,7 +133,9 @@ public class AdmobManager {
             }
             return;
         }
-
+        if (BuildConfig.DEBUG) {
+            Log.d("android_log", "Show inter: " + mInterstitialAd.getAdUnitId());
+        }
         mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
             public void onAdDismissedFullScreenContent() {
@@ -186,6 +193,9 @@ public class AdmobManager {
     }
 
     public void loadBanner(final Activity mActivity, String id) {
+        if (BuildConfig.DEBUG) {
+            Log.d("android_log", "Load banner :" + id);
+        }
         final FrameLayout adContainer = mActivity.findViewById(R.id.banner_container);
         final ShimmerFrameLayout containerShimmer = mActivity.findViewById(R.id.shimmer_container);
         loadBanner(mActivity, id, adContainer, containerShimmer);
@@ -248,6 +258,9 @@ public class AdmobManager {
     }
 
     public void loadNative(Context context, String id, FrameLayout placeHolder, int customNative) {
+        if (BuildConfig.DEBUG) {
+            Log.d("android_log", "Load Native: " + id);
+        }
         loadUnifiedNativeAd(context, id, new AdCallback() {
             @Override
             public void onNativeAds(NativeAd nativeAd) {
@@ -300,7 +313,6 @@ public class AdmobManager {
                 .build();
         adLoader.loadAd(request);
     }
-
 
     private void populateUnifiedNativeAdView(NativeAd nativeAd, NativeAdView adView) {
         try {
@@ -432,7 +444,6 @@ public class AdmobManager {
         }
         return "";
     }
-
 
     public void hasAds(boolean hasAds) {
         this.hasAds = hasAds;

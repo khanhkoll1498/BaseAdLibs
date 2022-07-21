@@ -43,6 +43,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public int getResourceId(String pVariableName, String pResourcename, String pPackageName) {
+        try {
+            return getResources().getIdentifier(pVariableName, pResourcename, pPackageName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
 
     private void loadInter() {
         AdmobManager.getInstance().loadInterAds(this, "ca-app-pub-3940256099942544/8691691433", new AdCallback() {
