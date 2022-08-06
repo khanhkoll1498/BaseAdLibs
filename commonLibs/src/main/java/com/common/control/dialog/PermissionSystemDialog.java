@@ -36,7 +36,7 @@ public class PermissionSystemDialog extends AppCompatActivity {
     private void initViews() {
         String[] permissions = getIntent().getStringArrayExtra("data");
         if (PermissionUtils.permissionGranted(this, permissions)) {
-            if (permissionCallback!=null){
+            if (permissionCallback != null) {
                 permissionCallback.onPermissionGranted();
             }
             finish();

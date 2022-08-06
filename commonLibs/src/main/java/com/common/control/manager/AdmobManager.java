@@ -20,11 +20,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
-import com.common.control.BuildConfig;
 import com.common.control.R;
 import com.common.control.dialog.PrepareLoadingAdsDialog;
 import com.common.control.interfaces.AdCallback;
-import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
@@ -41,6 +39,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -83,13 +83,14 @@ public class AdmobManager {
             });
             MobileAds.setRequestConfiguration(new RequestConfiguration.Builder()
                     .setTestDeviceIds(Collections.singletonList(deviceID)).build());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public AdRequest getAdRequest() {
-        if (!hasAds) {
+        if (PurchaseManager.getInstance().isPurchased()) {
             return null;
         }
         AdRequest.Builder builder = new AdRequest.Builder();
@@ -126,7 +127,7 @@ public class AdmobManager {
 
 
     public void showInterstitial(final Activity context, final InterstitialAd mInterstitialAd, final AdCallback callback) {
-        if (!hasAds || mInterstitialAd == null) {
+        if (!hasAds || mInterstitialAd == null || PurchaseManager.getInstance().isPurchased()) {
             if (callback != null) {
                 callback.onAdFailedToLoad(errAd);
             }
@@ -194,22 +195,20 @@ public class AdmobManager {
         Log.d("log_admob", "Load banner :" + id);
 
         final FrameLayout adContainer = mActivity.findViewById(R.id.banner_container);
-        final ShimmerFrameLayout containerShimmer = mActivity.findViewById(R.id.shimmer_container);
-        loadBanner(mActivity, id, adContainer, containerShimmer);
+
+        loadBanner(mActivity, id, adContainer);
     }
 
-    private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, final ShimmerFrameLayout containerShimmer) {
+    private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer) {
         AdRequest request = getAdRequest();
         if (request == null) {
+            adContainer.removeAllViews();
             adContainer.setVisibility(View.GONE);
-            containerShimmer.setVisibility(View.GONE);
             return;
         }
-        containerShimmer.startShimmer();
         try {
             AdView adView = new AdView(mActivity);
             adView.setAdUnitId(id);
-            adContainer.addView(adView);
             AdSize adSize = getAdSize(mActivity);
             adView.setAdSize(adSize);
             adView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -218,18 +217,18 @@ public class AdmobManager {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
-                    containerShimmer.stopShimmer();
+                    adContainer.removeAllViews();
                     adContainer.setVisibility(View.GONE);
-                    containerShimmer.setVisibility(View.GONE);
                 }
 
 
                 @Override
                 public void onAdLoaded() {
-                    containerShimmer.stopShimmer();
-                    containerShimmer.setVisibility(View.GONE);
+                    adContainer.removeAllViews();
                     adContainer.setVisibility(View.VISIBLE);
+                    adContainer.addView(adView);
                 }
+
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -256,7 +255,6 @@ public class AdmobManager {
 
     public void loadNative(Context context, String id, FrameLayout placeHolder, int customNative) {
         Log.d("log_admob", "Load Native: " + id);
-
         loadUnifiedNativeAd(context, id, new AdCallback() {
             @Override
             public void onNativeAds(NativeAd nativeAd) {
@@ -273,6 +271,7 @@ public class AdmobManager {
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError i) {
+                placeHolder.removeAllViews();
                 placeHolder.setVisibility(View.GONE);
             }
         });
@@ -410,6 +409,25 @@ public class AdmobManager {
 
         adView.setNativeAd(nativeAd);
 
+    }
+
+
+    public void loadRewardAd(Context context, String id, RewardedAdLoadCallback adLoadCallback) {
+        AdRequest request = getAdRequest();
+        if (request == null) {
+            adLoadCallback.onAdFailedToLoad(errAd);
+            return;
+        }
+
+        RewardedAd.load(context, id, request, adLoadCallback);
+    }
+
+    public void showRewardAd(Activity activity, RewardedAd rewardedAd, AdCallback callback) {
+        if (!hasAds || rewardedAd == null || PurchaseManager.getInstance().isPurchased()) {
+            callback.onAdFailedToShowFullScreenContent(errAd);
+            return;
+        }
+        rewardedAd.show(activity, callback::onUserEarnedReward);
     }
 
     @SuppressLint("HardwareIds")

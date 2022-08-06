@@ -4,6 +4,12 @@ import android.app.Application;
 
 import com.common.control.manager.AdmobManager;
 import com.common.control.manager.AppOpenManager;
+import com.common.control.manager.PurchaseManager;
+import com.common.control.model.PurchaseModel;
+import com.common.control.utils.CommonUtils;
+import com.common.control.utils.SharePrefUtils;
+
+import java.util.List;
 
 
 public abstract class MyApplication extends Application {
@@ -12,6 +18,7 @@ public abstract class MyApplication extends Application {
     public final void onCreate() {
         super.onCreate();
 
+        SharePrefUtils.getInstance().init(this);
         AdmobManager.getInstance().init(this, isShowAdsTest() ? AdmobManager.getInstance().getDeviceId(this) : "");
         AdmobManager.getInstance().hasAds(hasAds());
         if (enableAdsResume()) {
@@ -19,7 +26,12 @@ public abstract class MyApplication extends Application {
         }
         AdmobManager.getInstance().setShowLoadingDialog(isShowDialogLoadingAd());
         onApplicationCreate();
-//        PurchaseManager.getInstance().initBilling(this);
+
+        CommonUtils.getInstance().setPolicyUrl(getPolicyUrl());
+
+        if (isInitBilling()) {
+            PurchaseManager.getInstance().init(this, getPurchaseList());
+        }
     }
 
 
@@ -31,7 +43,14 @@ public abstract class MyApplication extends Application {
 
     protected abstract boolean isShowAdsTest();
 
-    public abstract boolean enableAdsResume();
+    protected abstract boolean enableAdsResume();
 
-    public abstract String getOpenAppAdId();
+    protected abstract String getOpenAppAdId();
+
+    protected abstract String getPolicyUrl();
+
+    protected abstract boolean isInitBilling();
+
+    protected abstract List<PurchaseModel> getPurchaseList();
+
 }

@@ -19,8 +19,11 @@ import java.util.TimeZone;
 public class CommonUtils {
     private static CommonUtils instance;
     private static final String TAG = CommonUtils.class.getName();
+    private String policyUrl;
 
-    public static boolean isShowNewInter = false;
+    public void setPolicyUrl(String policyUrl) {
+        this.policyUrl = policyUrl;
+    }
 
     private CommonUtils() {
     }
@@ -34,7 +37,7 @@ public class CommonUtils {
     }
 
 
-    public void shareApp(Context context,String subject) {
+    public void shareApp(Context context, String subject) {
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         String shareBody =
@@ -44,7 +47,7 @@ public class CommonUtils {
         context.startActivity(Intent.createChooser(sharingIntent, "Share to"));
     }
 
-    public void support(Context context,String subject,String email) {
+    public void support(Context context, String subject, String email) {
         Intent mailIntent = new Intent(Intent.ACTION_VIEW);
         Uri data =
                 Uri.parse("mailto:?SUBJECT=" + subject + "&body=" + "" + "&to=" + email);
@@ -70,7 +73,7 @@ public class CommonUtils {
         }
     }
 
-    public void showPolicy(Context context,String policyUrl) {
+    public void showPolicy(Context context) {
         openWeb(context, policyUrl);
     }
 

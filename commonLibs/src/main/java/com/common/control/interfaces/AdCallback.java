@@ -3,9 +3,9 @@ package com.common.control.interfaces;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.formats.UnifiedNativeAd;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.rewarded.RewardItem;
 
 abstract public class AdCallback {
     public AdCallback() {
@@ -36,6 +36,10 @@ abstract public class AdCallback {
     }
 
     public void onAdFailedToShowFullScreenContent(LoadAdError errAd) {
+
+    }
+
+    public void onUserEarnedReward(RewardItem rewardItem) {
 
     }
 }

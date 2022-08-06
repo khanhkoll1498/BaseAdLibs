@@ -44,4 +44,13 @@ dependencies {
 
     implementation "androidx.multidex:multidex:2.0.1"
 
+    def billing_version = "5.0.0"
+
+    implementation "com.android.billingclient:billing:$billing_version"
+
+
+    implementation('com.akexorcist:localization:1.2.10') {
+        exclude group: 'androidx.core', module: 'core'
+    }
+
 }

@@ -47,13 +47,11 @@ public class PermissionUtils {
                 .show();
     }
 
-
     public static void requestPermission(Activity activity, String... permission) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             activity.requestPermissions(permission, REQUEST_PERMISSION_ANY);
         }
     }
-
 
     public static boolean permissionGranted(Activity activity, String... permissions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -65,7 +63,6 @@ public class PermissionUtils {
         }
         return true;
     }
-
 
     public static boolean isStoragePermissionGranted(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

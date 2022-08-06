@@ -1,270 +1,250 @@
-//package com.common.control.manager;
-//
-//import android.annotation.SuppressLint;
-//import android.app.Activity;
-//import android.content.Context;
-//
-//import androidx.annotation.NonNull;
-//
-//import com.android.billingclient.api.AcknowledgePurchaseParams;
-//import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
-//import com.android.billingclient.api.BillingClient;
-//import com.android.billingclient.api.BillingClientStateListener;
-//import com.android.billingclient.api.BillingFlowParams;
-//import com.android.billingclient.api.BillingResult;
-//import com.android.billingclient.api.ConsumeParams;
-//import com.android.billingclient.api.Purchase;
-//import com.android.billingclient.api.PurchasesUpdatedListener;
-//import com.android.billingclient.api.SkuDetails;
-//import com.android.billingclient.api.SkuDetailsParams;
-//import com.common.control.interfaces.PurchaseCallback;
-//
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.Objects;
-//
-//public class PurchaseManager {
-//    private static final String TAG = PurchaseManager.class.getName();
-//    public static final String PRODUCT_SUB_WEEK = "";
-//    public static final String PRODUCT_SUB_MONTH = "";
-//    public static final String PRODUCT_LIFETIME = "android.test.purchased";
-//    private BillingClient billingClient;
-//    private PurchaseCallback callback;
-//    @SuppressLint("StaticFieldLeak")
-//    private static PurchaseManager instance;
-//    private List<SkuDetails> skuDetailsListIAP = new ArrayList<>();
-//    private List<SkuDetails> skuDetailsListSUB = new ArrayList<>();
-//    private boolean isPurchased;
-//    private final AcknowledgePurchaseResponseListener acknowledgePurchaseResponseListener = new AcknowledgePurchaseResponseListener() {
-//        @Override
-//        public void onAcknowledgePurchaseResponse(@NonNull BillingResult billingResult) {
-//            callback.purchaseSuccess();
-//        }
-//    };
-//
-//    public void setPurchased(boolean purchased) {
-//        isPurchased = purchased;
-//    }
-//
-//    public void setCallback(PurchaseCallback callback) {
-//        this.callback = callback;
-//    }
-//
-//    private final PurchasesUpdatedListener purchasesUpdatedListener = new PurchasesUpdatedListener() {
-//
-//        public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
-//            // To be implemented in a later section.
-//            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK
-//                    && purchases != null) {
-//                for (int i = 0; i < purchases.size(); i++) {
-//                    handlePurchase(purchases.get(i));
-//                }
-//            } else {
-//                callback.purchaseFail();
-//            }
-//        }
-//    };
-//
-//    private void handlePurchase(Purchase purchase) {
-//        if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
-//            if (!purchase.isAcknowledged()) {
-//                AcknowledgePurchaseParams acknowledgePurchaseParams =
-//                        AcknowledgePurchaseParams.newBuilder()
-//                                .setPurchaseToken(purchase.getPurchaseToken())
-//                                .build();
-//                billingClient.acknowledgePurchase(acknowledgePurchaseParams, acknowledgePurchaseResponseListener);
-//            }
-//        }
-////        ConsumeParams consumeParams =
-////                ConsumeParams.newBuilder()
-////                        .setPurchaseToken(purchase.getPurchaseToken())
-////                        .build();
-////
-////        ConsumeResponseListener listener = (billingResult, purchaseToken) -> {
-////            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-////                callback.purchaseSucess();
-////            }
-////        };
-////
-////        billingClient.consumeAsync(consumeParams, listener);
-//    }
-//
-//
-//    public static synchronized PurchaseManager getInstance() {
-//        if (instance == null) {
-//            instance = new PurchaseManager();
-//        }
-//        return instance;
-//    }
-//
-//    private PurchaseManager() {
-//
-//    }
-//
-//    public void initBilling(final Context context) {
-//        billingClient = BillingClient.newBuilder(context)
-//                .setListener(purchasesUpdatedListener)
-//                .enablePendingPurchases()
-//                .build();
-//        restore(context, null);
-//    }
-//
-//    public void restore(final Context context, PurchaseCallback callback) {
-//        billingClient.startConnection(new BillingClientStateListener() {
-//            @Override
-//            public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
-//                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-//                    // The BillingClient is ready. You can query purchases here.
-//                    SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
-//                    params.setSkusList(Collections.singletonList(PRODUCT_LIFETIME)).setType(BillingClient.SkuType.INAPP);
-//                    billingClient.querySkuDetailsAsync(params.build(),
-//                            (billingResult12, skuDetailsList) -> PurchaseManager.this.skuDetailsListIAP = skuDetailsList);
-//
-//                    params.setSkusList(Arrays.asList(PRODUCT_SUB_WEEK, PRODUCT_SUB_MONTH)).setType(BillingClient.SkuType.SUBS);
-//                    billingClient.querySkuDetailsAsync(params.build(),
-//                            (billingResult1, skuDetailsList) -> PurchaseManager.this.skuDetailsListSUB = skuDetailsList);
-//                    if (callback != null) {
-//                        if (isPremium(context)) {
-//                            callback.purchaseSuccess();
-//                        } else {
-//                            callback.purchaseFail();
-//                        }
-//                    }
-//
-//                } else {
-//                    if (callback != null) {
-//                        callback.purchaseFail();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onBillingServiceDisconnected() {
-//                billingClient = null;
-//                // Try to restart the connection on the next request to
-//                // Google Play by calling the startConnection() method.
-//            }
-//        });
-//    }
-//
-//    public void consume(String productId) {
-//        Purchase purchase = getPurchase(productId);
-//        if (purchase != null) {
-//            ConsumeParams consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
-//            billingClient.consumeAsync(consumeParams, (billingResult, s) -> {
-//
-//            });
-//        }
-//    }
-//
-//    private Purchase getPurchase(String productId) {
-//        Purchase.PurchasesResult purchasesResult = billingClient.queryPurchases(BillingClient.SkuType.INAPP);
-//        for (Purchase purchase :
-//                Objects.requireNonNull(purchasesResult.getPurchasesList())) {
-//            if (purchase.getSkus().get(0).equals(productId)) return purchase;
-//        }
-//        return null;
-//    }
-//
-//    public boolean isPremium(Context context) {
-//        if (isPurchased) {
-//            return true;
-//        }
-//        if (billingClient == null) {
-//            if (context == null) {
-//                return false;
-//            }
-//            initBilling(context);
-//        }
-//        return isPurchased() || isSubscribed();
-////        return true;
-//    }
-//
-//    private boolean isPurchased() {
-//        Purchase.PurchasesResult purchasesResult = billingClient.queryPurchases(BillingClient.SkuType.INAPP);
-//        if (purchasesResult == null || purchasesResult.getPurchasesList() == null) return false;
-//
-//        for (Purchase purchase :
-//                purchasesResult.getPurchasesList()) {
-//            if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    private boolean isSubscribed() {
-//        Purchase.PurchasesResult purchasesResult = billingClient.queryPurchases(BillingClient.SkuType.SUBS);
-//        if (purchasesResult.getPurchasesList() == null) return false;
-//        for (Purchase purchase :
-//                purchasesResult.getPurchasesList()) {
-//            if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    public void purchase(Activity activity, String productId) {
-//        if (billingClient == null) {
-//            initBilling(activity);
-//        }
-//        SkuDetails skuDetails = getSkuDetail(skuDetailsListIAP, productId);
-//        if (skuDetails == null) {
-//            return;
-//        }
-//        BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
-//                .setSkuDetails(skuDetails)
-//                .build();
-//        billingClient.launchBillingFlow(activity, billingFlowParams);
-//    }
-//
-//    public void subscribe(Activity activity, String productId) {
-//        if (billingClient == null) {
-//            initBilling(activity);
-//        }
-//        try {
-//            SkuDetails skuDetails = getSkuDetail(skuDetailsListSUB, productId);
-//            if (skuDetails == null) return;
-//            BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
-//                    .setSkuDetails(skuDetails)
-//                    .build();
-//            billingClient.launchBillingFlow(activity, billingFlowParams);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    private SkuDetails getSkuDetail(List<SkuDetails> skuDetailsListSUB, String productId) {
-//        for (SkuDetails skuDetails :
-//                skuDetailsListSUB) {
-//            if (skuDetails.getSku().equals(productId)) {
-//                return skuDetails;
-//            }
-//        }
-//        return null;
-//    }
-//
-//    public String getPrice(String productId) {
-//        if (billingClient == null || !billingClient.isReady()) {
-//            return "";
-//        }
-//        for (SkuDetails skuDetails :
-//                skuDetailsListSUB) {
-//            if (skuDetails.getSku().equals(productId)) {
-//                return skuDetails.getPrice();
-//            }
-//        }
-//        for (SkuDetails skuDetails :
-//                skuDetailsListIAP) {
-//            if (skuDetails.getSku().equals(productId)) {
-//                return skuDetails.getPrice();
-//            }
-//        }
-//        return "";
-//    }
-//
-//
-//}
+package com.common.control.manager;
+
+import android.app.Activity;
+import android.content.Context;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryPurchasesParams;
+import com.common.control.interfaces.PurchaseCallback;
+import com.common.control.model.PurchaseModel;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class PurchaseManager {
+    private static PurchaseManager instance;
+
+
+    public static PurchaseManager getInstance() {
+        if (instance == null) {
+            instance = new PurchaseManager();
+        }
+        return instance;
+    }
+
+    private PurchaseManager() {
+
+    }
+
+    private final List<Purchase> purchaseList = new ArrayList<>();
+    private List<ProductDetails> productDetailsList;
+
+    private PurchaseCallback callback;
+
+    public void setCallback(PurchaseCallback callback) {
+        this.callback = callback;
+    }
+
+    private final AcknowledgePurchaseResponseListener acknowledgePurchaseResponseListener = billingResult -> {
+        queryPurchase();
+    };
+    private BillingClient billingClient;
+    private List<PurchaseModel> purchaseModelList;
+
+    private final PurchasesUpdatedListener purchasesUpdatedListener = (billingResult, list) -> {
+        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK
+                && list != null) {
+            for (int i = 0; i < list.size(); i++) {
+                handlePurchase(list.get(i));
+            }
+            callback.purchaseSuccess();
+
+        } else {
+            callback.purchaseFail();
+        }
+    };
+
+    private void handlePurchase(Purchase purchase) {
+        if (purchase.getPurchaseState() == com.android.billingclient.api.Purchase.PurchaseState.PURCHASED) {
+            if (!purchase.isAcknowledged()) {
+                AcknowledgePurchaseParams acknowledgePurchaseParams =
+                        AcknowledgePurchaseParams.newBuilder()
+                                .setPurchaseToken(purchase.getPurchaseToken())
+                                .build();
+                billingClient.acknowledgePurchase(acknowledgePurchaseParams, acknowledgePurchaseResponseListener);
+            }
+        }
+    }
+
+
+    public void init(Context context, List<PurchaseModel> purchaseModelList) {
+        this.purchaseModelList = purchaseModelList;
+        billingClient = BillingClient.newBuilder(context)
+                .setListener(purchasesUpdatedListener)
+                .enablePendingPurchases()
+                .build();
+        connectGooglePlay();
+    }
+
+    private void connectGooglePlay() {
+        billingClient.startConnection(new BillingClientStateListener() {
+
+            @Override
+            public void onBillingSetupFinished(BillingResult billingResult) {
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    queryPurchase();
+                    queryProductDetails();
+                }
+            }
+
+
+            @Override
+            public void onBillingServiceDisconnected() {
+                // Try to restart the connection on the next request to
+                // Google Play by calling the startConnection() method.
+            }
+        });
+    }
+
+    private void queryProductDetails() {
+        List<QueryProductDetailsParams.Product> productList = new ArrayList<>();
+        for (int i = 0; i < this.purchaseModelList.size(); i++) {
+            QueryProductDetailsParams.Product product = QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(this.purchaseModelList.get(i).getProductId())
+                    .setProductType(this.purchaseModelList.get(i).getType())
+                    .build();
+            productList.add(product);
+        }
+        QueryProductDetailsParams queryProductDetailsParams =
+                QueryProductDetailsParams.newBuilder()
+                        .setProductList(productList)
+                        .build();
+
+        billingClient.queryProductDetailsAsync(
+                queryProductDetailsParams,
+                (billingResult, productDetailsList) -> {
+                    // check billingResult
+                    // process returned productDetailsList
+                    PurchaseManager.this.productDetailsList = productDetailsList;
+                }
+        );
+    }
+
+    private void queryPurchase() {
+        purchaseList.clear();
+        QueryPurchasesParams param = QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build();
+        billingClient.queryPurchasesAsync(param, (billingResult, list) -> purchaseList.addAll(list));
+
+        param = QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build();
+        billingClient.queryPurchasesAsync(param, (billingResult, list) -> purchaseList.addAll(list));
+    }
+
+
+    public void consume(String productId) {
+        Purchase purchase = getPurchase(productId);
+        if (purchase != null) {
+            ConsumeParams consumeParams =
+                    ConsumeParams.newBuilder()
+                            .setPurchaseToken(purchase.getPurchaseToken())
+                            .build();
+
+            ConsumeResponseListener listener = new ConsumeResponseListener() {
+                @Override
+                public void onConsumeResponse(BillingResult billingResult, @NonNull String purchaseToken) {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                        // Handle the success of the consume operation.
+                        Log.d("android_log", "onConsumeResponse: OK");
+                        queryPurchase();
+                    } else {
+                        Log.d("android_log", "onConsumeResponse: Faile");
+                    }
+                }
+            };
+
+            billingClient.consumeAsync(consumeParams, listener);
+        }
+    }
+
+    private Purchase getPurchase(String productId) {
+        for (int i = 0; i < purchaseList.size(); i++) {
+            try {
+                if (purchaseList.get(i).getProducts().get(0).equals(productId)) {
+                    return purchaseList.get(i);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public boolean isPurchased() {
+        if (!AdmobManager.getInstance().isHasAds()) {
+            return true;
+        }
+        for (int i = 0; i < purchaseList.size(); i++) {
+            Purchase purchase = purchaseList.get(i);
+            if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void launchPurchase(Activity activity, String productId) {
+        ProductDetails productDetails = getProductDetail(productId);
+        if (productDetails == null) {
+            callback.purchaseFail();
+            queryPurchase();
+            queryProductDetails();
+            return;
+        }
+        BillingFlowParams.ProductDetailsParams productDetailsParams = BillingFlowParams.ProductDetailsParams.newBuilder()
+                // retrieve a value for "productDetails" by calling queryProductDetailsAsync()
+                .setProductDetails(productDetails)
+                // to get an offer token, call ProductDetails.getSubscriptionOfferDetails()
+                // for a list of offers that are available to the user
+                .build();
+        BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(Collections.singletonList(productDetailsParams))
+                .build();
+        BillingResult billingResult = billingClient.launchBillingFlow(activity, billingFlowParams);
+        Log.d("android_log", "launchPurchase: " + billingResult.getDebugMessage());
+
+    }
+
+    private ProductDetails getProductDetail(String productId) {
+        if (productDetailsList != null) {
+            for (int i = 0; i < productDetailsList.size(); i++) {
+                if (productDetailsList.get(i).getProductId().equals(productId)) {
+                    {
+                        return productDetailsList.get(i);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public String getPrice(String productId) {
+        if (productDetailsList != null) {
+            for (int i = 0; i < productDetailsList.size(); i++) {
+                if (productDetailsList.get(i).getProductId().equals(productId)) {
+                    {
+                        ProductDetails.OneTimePurchaseOfferDetails detail = productDetailsList.get(i).getOneTimePurchaseOfferDetails();
+                        if (detail != null) {
+                            return detail.getFormattedPrice();
+                        }
+                    }
+                }
+            }
+        }
+
+        return "";
+    }
+}

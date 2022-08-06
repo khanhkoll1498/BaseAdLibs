@@ -1,22 +1,28 @@
 package com.masterlibs.commonlibs;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.common.control.dialog.PermissionStorageDialog;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.common.control.interfaces.AdCallback;
-import com.common.control.interfaces.PermissionCallback;
+import com.common.control.interfaces.PurchaseCallback;
 import com.common.control.manager.AdmobManager;
+import com.common.control.manager.PurchaseManager;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static InterstitialAd inter;
+    private RewardedAd rewardedAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,21 +30,58 @@ public class MainActivity extends AppCompatActivity {
         Log.d("android_log", "onCreate: MainActivity");
         setContentView(R.layout.activity_main);
         Button button = findViewById(R.id.bt_start);
+        Button btBuy = findViewById(R.id.bt_buy);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PermissionStorageDialog.start(MainActivity.this, new PermissionCallback() {
+//                PermissionStorageDialog.start(MainActivity.this, new PermissionCallback() {
+//                    @Override
+//                    public void onPermissionGranted() {
+//                        Toast.makeText(MainActivity.this, "onPermissionGranted", Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                    @Override
+//                    public void onPermissionDenied() {
+//                        Toast.makeText(MainActivity.this, "onPermissionDenied", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//                SecondScreenActivity.start(MainActivity.this);
+//                AdmobManager.getInstance().showInterstitial(MainActivity.this, inter, null);
+
+                AdmobManager.getInstance().showRewardAd(MainActivity.this, rewardedAd, new AdCallback() {
                     @Override
-                    public void onPermissionGranted() {
-                        Toast.makeText(MainActivity.this, "onPermissionGranted", Toast.LENGTH_SHORT).show();
+                    public void onAdFailedToShowFullScreenContent(LoadAdError errAd) {
+                        super.onAdFailedToShowFullScreenContent(errAd);
                     }
 
                     @Override
-                    public void onPermissionDenied() {
-                        Toast.makeText(MainActivity.this, "onPermissionDenied", Toast.LENGTH_SHORT).show();
+                    public void onUserEarnedReward(RewardItem rewardItem) {
+                        super.onUserEarnedReward(rewardItem);
+                        rewardedAd = null;
                     }
                 });
             }
+        });
+        PurchaseManager.getInstance().setCallback(new PurchaseCallback() {
+            @Override
+            public void purchaseSuccess() {
+                Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void purchaseFail() {
+                Toast.makeText(MainActivity.this, "Fail", Toast.LENGTH_SHORT).show();
+            }
+        });
+        btBuy.setOnClickListener(v -> {
+            if (PurchaseManager.getInstance().isPurchased()) {
+                Toast.makeText(this, "Purchased", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            PurchaseManager.getInstance().launchPurchase(this, App.PRODUCT_LIFETIME);
+        });
+        findViewById(R.id.bt_consume).setOnClickListener(v -> {
+            PurchaseManager.getInstance().consume(App.PRODUCT_LIFETIME);
         });
 
     }
@@ -57,19 +100,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResultInterstitialAd(InterstitialAd interstitialAd) {
                 super.onResultInterstitialAd(interstitialAd);
-                startActivity(new Intent(MainActivity.this, SecondScreenActivity.class));
-                AdmobManager.getInstance().showInterstitial(MainActivity.this, interstitialAd, this);
+                MainActivity.inter = interstitialAd;
             }
 
             @Override
             public void onAdFailedToLoad(LoadAdError i) {
                 super.onAdFailedToLoad(i);
-                startActivity(new Intent(MainActivity.this, SecondScreenActivity.class));
             }
 
             @Override
             public void onAdClosed() {
                 super.onAdClosed();
+            }
+        });
+
+        AdmobManager.getInstance().loadRewardAd(this, "ca-app-pub-3940256099942544/5224354917", new RewardedAdLoadCallback() {
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
+            }
+
+            @Override
+            public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                super.onAdLoaded(rewardedAd);
+                MainActivity.this.rewardedAd = rewardedAd;
             }
         });
     }
@@ -91,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("android_log", "onResume: MainActivity");
         loadInter();
-
     }
 
     @Override
