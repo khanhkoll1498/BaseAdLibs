@@ -12,7 +12,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/_25sdp"
         android:layout_marginBottom="@dimen/_16sdp"
-        android:background="@drawable/btn_scan"
+        android:background="@drawable/bg_dialog_rate"
         android:orientation="vertical">
         <TextView
             android:layout_width="wrap_content"

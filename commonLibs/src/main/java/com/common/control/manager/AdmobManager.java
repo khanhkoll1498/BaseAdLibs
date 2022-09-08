@@ -129,7 +129,7 @@ public class AdmobManager {
     public void showInterstitial(final Activity context, final InterstitialAd mInterstitialAd, final AdCallback callback) {
         if (!hasAds || mInterstitialAd == null || PurchaseManager.getInstance().isPurchased()) {
             if (callback != null) {
-                callback.onAdFailedToLoad(errAd);
+                callback.onAdFailedToShowFullScreenContent(errAd);
             }
             return;
         }
@@ -186,7 +186,7 @@ public class AdmobManager {
             }, timeShowLoadingDlg);
         } else {
             if (callback != null) {
-                callback.onAdClosed();
+                callback.onAdFailedToShowFullScreenContent(errAd);
             }
         }
     }
@@ -199,7 +199,7 @@ public class AdmobManager {
         loadBanner(mActivity, id, adContainer);
     }
 
-    private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer) {
+    public void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer) {
         AdRequest request = getAdRequest();
         if (request == null) {
             adContainer.removeAllViews();
@@ -210,6 +210,7 @@ public class AdmobManager {
             AdView adView = new AdView(mActivity);
             adView.setAdUnitId(id);
             AdSize adSize = getAdSize(mActivity);
+            Log.d("android_log", "loadBanner: " + adSize.getWidth() + "__" + adSize.getHeight());
             adView.setAdSize(adSize);
             adView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
             adView.loadAd(request);
@@ -264,7 +265,7 @@ public class AdmobManager {
                                 customNative,
                                 null
                         );
-                populateUnifiedNativeAdView(nativeAd, nativeAdView);
+                onBindAdView(nativeAd, nativeAdView);
                 placeHolder.removeAllViews();
                 placeHolder.addView(nativeAdView);
             }
@@ -309,7 +310,7 @@ public class AdmobManager {
         adLoader.loadAd(request);
     }
 
-    private void populateUnifiedNativeAdView(NativeAd nativeAd, NativeAdView adView) {
+    private void onBindAdView(NativeAd nativeAd, NativeAdView adView) {
         try {
             adView.setMediaView(adView.findViewById(R.id.ad_media));
         } catch (Exception e) {

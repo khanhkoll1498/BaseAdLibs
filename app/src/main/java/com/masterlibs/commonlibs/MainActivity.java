@@ -1,5 +1,6 @@
 package com.masterlibs.commonlibs;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,10 +15,15 @@ import com.common.control.interfaces.PurchaseCallback;
 import com.common.control.manager.AdmobManager;
 import com.common.control.manager.PurchaseManager;
 import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -83,6 +89,39 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.bt_consume).setOnClickListener(v -> {
             PurchaseManager.getInstance().consume(App.PRODUCT_LIFETIME);
         });
+
+
+        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                AdvertisingIdClient.Info idInfo = null;
+                try {
+                    idInfo = AdvertisingIdClient.getAdvertisingIdInfo(getApplicationContext());
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                String advertId = null;
+                try{
+                    advertId = idInfo.getId();
+                }catch (NullPointerException e){
+                    e.printStackTrace();
+                }
+
+                return advertId;
+            }
+
+            @Override
+            protected void onPostExecute(String advertId) {
+                Log.d("android_log", "onPostExecute: "+advertId);
+                Toast.makeText(getApplicationContext(), advertId, Toast.LENGTH_SHORT).show();
+            }
+
+        };
+        task.execute();
 
     }
 

@@ -161,7 +161,7 @@ public class PurchaseManager {
                         Log.d("android_log", "onConsumeResponse: OK");
                         queryPurchase();
                     } else {
-                        Log.d("android_log", "onConsumeResponse: Faile");
+                        Log.d("android_log", "onConsumeResponse: Failed");
                     }
                 }
             };
