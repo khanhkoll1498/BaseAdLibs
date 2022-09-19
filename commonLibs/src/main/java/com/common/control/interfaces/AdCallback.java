@@ -2,6 +2,7 @@ package com.common.control.interfaces;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.ads.AdValue;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.nativead.NativeAd;
@@ -10,6 +11,7 @@ import com.google.android.gms.ads.rewarded.RewardItem;
 abstract public class AdCallback {
     public AdCallback() {
     }
+
 
     public void onAdClosed() {
     }
@@ -40,6 +42,9 @@ abstract public class AdCallback {
     }
 
     public void onUserEarnedReward(RewardItem rewardItem) {
+
+    }
+    public void setOnPaidEventListener(AdValue adValue){
 
     }
 }

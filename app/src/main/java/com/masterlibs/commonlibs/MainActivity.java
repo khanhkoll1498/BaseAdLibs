@@ -80,11 +80,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         btBuy.setOnClickListener(v -> {
-            if (PurchaseManager.getInstance().isPurchased()) {
-                Toast.makeText(this, "Purchased", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            PurchaseManager.getInstance().launchPurchase(this, App.PRODUCT_LIFETIME);
+//            if (PurchaseManager.getInstance().isPurchased()) {
+//                Toast.makeText(this, "Purchased", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//            PurchaseManager.getInstance().launchPurchase(this, App.PRODUCT_LIFETIME);
+            SecondScreenActivity.start(this);
         });
         findViewById(R.id.bt_consume).setOnClickListener(v -> {
             PurchaseManager.getInstance().consume(App.PRODUCT_LIFETIME);

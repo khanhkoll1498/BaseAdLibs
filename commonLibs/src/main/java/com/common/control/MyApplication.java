@@ -6,7 +6,7 @@ import com.common.control.manager.AdmobManager;
 import com.common.control.manager.AppOpenManager;
 import com.common.control.manager.PurchaseManager;
 import com.common.control.model.PurchaseModel;
-import com.common.control.utils.CommonUtils;
+import com.common.control.utils.AppUtils;
 import com.common.control.utils.SharePrefUtils;
 
 import java.util.List;
@@ -27,7 +27,9 @@ public abstract class MyApplication extends Application {
         AdmobManager.getInstance().setShowLoadingDialog(isShowDialogLoadingAd());
         onApplicationCreate();
 
-        CommonUtils.getInstance().setPolicyUrl(getPolicyUrl());
+        AppUtils.getInstance().setPolicyUrl(getPolicyUrl());
+        AppUtils.getInstance().setEmail(getEmailSupport());
+        AppUtils.getInstance().setSubject(getSubjectSupport());
 
         if (isInitBilling()) {
             PurchaseManager.getInstance().init(this, getPurchaseList());
@@ -48,6 +50,10 @@ public abstract class MyApplication extends Application {
     protected abstract String getOpenAppAdId();
 
     protected abstract String getPolicyUrl();
+
+    protected abstract String getSubjectSupport();
+
+    protected abstract String getEmailSupport();
 
     protected abstract boolean isInitBilling();
 

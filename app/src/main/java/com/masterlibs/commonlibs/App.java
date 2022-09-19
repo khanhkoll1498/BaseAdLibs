@@ -46,6 +46,16 @@ public class App extends MyApplication {
     }
 
     @Override
+    protected String getSubjectSupport() {
+        return null;
+    }
+
+    @Override
+    protected String getEmailSupport() {
+        return null;
+    }
+
+    @Override
     public boolean isInitBilling() {
         return false;
     }

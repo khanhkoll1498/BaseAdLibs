@@ -16,22 +16,32 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class CommonUtils {
-    private static CommonUtils instance;
-    private static final String TAG = CommonUtils.class.getName();
+public class AppUtils {
+    private static AppUtils instance;
+    private static final String TAG = AppUtils.class.getName();
     private String policyUrl;
+    private String subject;
+    private String email;
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
     public void setPolicyUrl(String policyUrl) {
         this.policyUrl = policyUrl;
     }
 
-    private CommonUtils() {
+    private AppUtils() {
     }
 
 
-    public static CommonUtils getInstance() {
+    public static AppUtils getInstance() {
         if (instance == null) {
-            instance = new CommonUtils();
+            instance = new AppUtils();
         }
         return instance;
     }
@@ -47,7 +57,7 @@ public class CommonUtils {
         context.startActivity(Intent.createChooser(sharingIntent, "Share to"));
     }
 
-    public void support(Context context, String subject, String email) {
+    public void support(Context context) {
         Intent mailIntent = new Intent(Intent.ACTION_VIEW);
         Uri data =
                 Uri.parse("mailto:?SUBJECT=" + subject + "&body=" + "" + "&to=" + email);

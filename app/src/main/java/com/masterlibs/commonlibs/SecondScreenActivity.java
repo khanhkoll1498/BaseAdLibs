@@ -8,7 +8,9 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.common.control.interfaces.AdCallback;
 import com.common.control.manager.AdmobManager;
+import com.google.android.gms.ads.AdValue;
 
 public class SecondScreenActivity extends AppCompatActivity {
     public static void start(Context context) {
@@ -21,7 +23,12 @@ public class SecondScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
         AdmobManager.getInstance().loadNative(this, "ca-app-pub-3940256099942544/2247696110", findViewById(R.id.fr_ad), R.layout.custom_native_media);
-        AdmobManager.getInstance().loadBanner(this, "ca-app-pub-3940256099942544/6300978111");
+        AdmobManager.getInstance().loadBanner(this, "ca-app-pub-3940256099942544/6300978111", new AdCallback() {
+            @Override
+            public void setOnPaidEventListener(AdValue adValue) {
+                super.setOnPaidEventListener(adValue);
+            }
+        });
         Log.d("android_log", "onCreate: SecondScreenActivity");
     }
 

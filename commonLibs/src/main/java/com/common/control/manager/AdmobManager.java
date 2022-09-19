@@ -90,7 +90,7 @@ public class AdmobManager {
     }
 
     public AdRequest getAdRequest() {
-        if (PurchaseManager.getInstance().isPurchased()) {
+        if (!hasAds || PurchaseManager.getInstance().isPurchased()) {
             return null;
         }
         AdRequest.Builder builder = new AdRequest.Builder();
@@ -126,15 +126,22 @@ public class AdmobManager {
     }
 
 
-    public void showInterstitial(final Activity context, final InterstitialAd mInterstitialAd, final AdCallback callback) {
-        if (!hasAds || mInterstitialAd == null || PurchaseManager.getInstance().isPurchased()) {
+    public void showInterstitial(final Activity context, InterstitialAd mInterstitialAd, final AdCallback callback) {
+        if (mInterstitialAd == null || PurchaseManager.getInstance().isPurchased()) {
+//            if (callback != null) {
+//                callback.onAdFailedToShowFullScreenContent(errAd);
+//            }
             if (callback != null) {
-                callback.onAdFailedToShowFullScreenContent(errAd);
+                callback.onAdClosed();
             }
             return;
         }
-        Log.d("log_admob", "Show inter: " + mInterstitialAd.getAdUnitId());
-
+        mInterstitialAd.setOnPaidEventListener(adValue -> {
+            if (callback != null) {
+                callback.setOnPaidEventListener(adValue);
+            }
+        });
+//        Log.d("log_admob", "Show inter: " + mInterstitialAd.getAdUnitId());
         mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
             public void onAdDismissedFullScreenContent() {
@@ -153,8 +160,11 @@ public class AdmobManager {
                     AppOpenManager.getInstance().enableAppResume();
                 }
                 context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
+//                if (callback != null) {
+//                    callback.onAdFailedToShowFullScreenContent(errAd);
+//                }
                 if (callback != null) {
-                    callback.onAdFailedToShowFullScreenContent(errAd);
+                    callback.onAdClosed();
                 }
             }
 
@@ -191,15 +201,30 @@ public class AdmobManager {
         }
     }
 
+    @Deprecated
     public void loadBanner(final Activity mActivity, String id) {
         Log.d("log_admob", "Load banner :" + id);
 
         final FrameLayout adContainer = mActivity.findViewById(R.id.banner_container);
 
-        loadBanner(mActivity, id, adContainer);
+        loadBanner(mActivity, id, adContainer, null);
+    }
+
+    @Deprecated
+    public void loadBanner(final Activity mActivity, String id, AdCallback callback) {
+        Log.d("log_admob", "Load banner :" + id);
+
+        final FrameLayout adContainer = mActivity.findViewById(R.id.banner_container);
+
+        loadBanner(mActivity, id, adContainer, callback);
     }
 
     public void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer) {
+        Log.d("log_admob", "Load banner :" + id);
+        loadBanner(mActivity, id, adContainer, null);
+    }
+
+    public void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, AdCallback callback) {
         AdRequest request = getAdRequest();
         if (request == null) {
             adContainer.removeAllViews();
@@ -228,6 +253,12 @@ public class AdmobManager {
                     adContainer.removeAllViews();
                     adContainer.setVisibility(View.VISIBLE);
                     adContainer.addView(adView);
+                    adView.setOnPaidEventListener(adValue -> {
+                        if (callback != null) {
+                            callback.setOnPaidEventListener(adValue);
+                        }
+                    });
+
                 }
 
             });
@@ -250,11 +281,16 @@ public class AdmobManager {
 
     }
 
+    @Deprecated
     public void loadNative(Context context, String id, FrameLayout placeHolder) {
         loadNative(context, id, placeHolder, R.layout.custom_native);
     }
 
     public void loadNative(Context context, String id, FrameLayout placeHolder, int customNative) {
+        loadNative(context, id, placeHolder, customNative, null);
+    }
+
+    public void loadNative(Context context, String id, FrameLayout placeHolder, int customNative, AdCallback callback) {
         Log.d("log_admob", "Load Native: " + id);
         loadUnifiedNativeAd(context, id, new AdCallback() {
             @Override
@@ -268,6 +304,11 @@ public class AdmobManager {
                 onBindAdView(nativeAd, nativeAdView);
                 placeHolder.removeAllViews();
                 placeHolder.addView(nativeAdView);
+                nativeAd.setOnPaidEventListener(adValue -> {
+                    if (callback != null) {
+                        callback.setOnPaidEventListener(adValue);
+                    }
+                });
             }
 
             @Override

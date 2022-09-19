@@ -132,6 +132,11 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
                 callback.onAdLoaded();
             return;
         }
+        AdRequest request = AdmobManager.getInstance().getAdRequest();
+        if (request == null) {
+            return;
+        }
+
         AppOpenAd.AppOpenAdLoadCallback loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull AppOpenAd ad) {
@@ -144,11 +149,6 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
                 AppOpenManager.this.appResumeAd = null;
             }
         };
-
-        AdRequest request = AdmobManager.getInstance().getAdRequest();
-        if (request == null) {
-            return;
-        }
         AppOpenAd.load(
                 myApplication, appResumeAdId, request,
                 AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, loadCallback);
