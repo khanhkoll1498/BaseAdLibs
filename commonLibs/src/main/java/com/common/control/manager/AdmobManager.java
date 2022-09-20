@@ -20,6 +20,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
+import com.adjust.sdk.AdjustAdRevenue;
+import com.adjust.sdk.AdjustConfig;
 import com.common.control.R;
 import com.common.control.dialog.PrepareLoadingAdsDialog;
 import com.common.control.interfaces.AdCallback;
@@ -28,6 +30,7 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdValue;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
@@ -89,6 +92,11 @@ public class AdmobManager {
         }
     }
 
+    public void trackRevenue(AdValue adValue) {
+        AdjustAdRevenue adRevenue = new AdjustAdRevenue(AdjustConfig.AD_REVENUE_ADMOB);
+        adRevenue.setRevenue((double) (adValue.getValueMicros() / 1000000f), adValue.getCurrencyCode());
+    }
+
     public AdRequest getAdRequest() {
         if (!hasAds || PurchaseManager.getInstance().isPurchased()) {
             return null;
@@ -136,11 +144,7 @@ public class AdmobManager {
             }
             return;
         }
-        mInterstitialAd.setOnPaidEventListener(adValue -> {
-            if (callback != null) {
-                callback.setOnPaidEventListener(adValue);
-            }
-        });
+        mInterstitialAd.setOnPaidEventListener(this::trackRevenue);
 //        Log.d("log_admob", "Show inter: " + mInterstitialAd.getAdUnitId());
         mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
@@ -201,30 +205,15 @@ public class AdmobManager {
         }
     }
 
+
     @Deprecated
     public void loadBanner(final Activity mActivity, String id) {
-        Log.d("log_admob", "Load banner :" + id);
-
         final FrameLayout adContainer = mActivity.findViewById(R.id.banner_container);
-
-        loadBanner(mActivity, id, adContainer, null);
+        loadBanner(mActivity, id, adContainer);
     }
 
-    @Deprecated
-    public void loadBanner(final Activity mActivity, String id, AdCallback callback) {
-        Log.d("log_admob", "Load banner :" + id);
-
-        final FrameLayout adContainer = mActivity.findViewById(R.id.banner_container);
-
-        loadBanner(mActivity, id, adContainer, callback);
-    }
 
     public void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer) {
-        Log.d("log_admob", "Load banner :" + id);
-        loadBanner(mActivity, id, adContainer, null);
-    }
-
-    public void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, AdCallback callback) {
         AdRequest request = getAdRequest();
         if (request == null) {
             adContainer.removeAllViews();
@@ -254,9 +243,7 @@ public class AdmobManager {
                     adContainer.setVisibility(View.VISIBLE);
                     adContainer.addView(adView);
                     adView.setOnPaidEventListener(adValue -> {
-                        if (callback != null) {
-                            callback.setOnPaidEventListener(adValue);
-                        }
+                        trackRevenue(adValue);
                     });
 
                 }
@@ -287,10 +274,6 @@ public class AdmobManager {
     }
 
     public void loadNative(Context context, String id, FrameLayout placeHolder, int customNative) {
-        loadNative(context, id, placeHolder, customNative, null);
-    }
-
-    public void loadNative(Context context, String id, FrameLayout placeHolder, int customNative, AdCallback callback) {
         Log.d("log_admob", "Load Native: " + id);
         loadUnifiedNativeAd(context, id, new AdCallback() {
             @Override
@@ -305,9 +288,7 @@ public class AdmobManager {
                 placeHolder.removeAllViews();
                 placeHolder.addView(nativeAdView);
                 nativeAd.setOnPaidEventListener(adValue -> {
-                    if (callback != null) {
-                        callback.setOnPaidEventListener(adValue);
-                    }
+                    trackRevenue(adValue);
                 });
             }
 
@@ -469,6 +450,7 @@ public class AdmobManager {
             callback.onAdFailedToShowFullScreenContent(errAd);
             return;
         }
+        rewardedAd.setOnPaidEventListener(this::trackRevenue);
         rewardedAd.show(activity, callback::onUserEarnedReward);
     }
 

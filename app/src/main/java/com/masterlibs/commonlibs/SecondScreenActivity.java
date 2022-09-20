@@ -23,12 +23,7 @@ public class SecondScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
         AdmobManager.getInstance().loadNative(this, "ca-app-pub-3940256099942544/2247696110", findViewById(R.id.fr_ad), R.layout.custom_native_media);
-        AdmobManager.getInstance().loadBanner(this, "ca-app-pub-3940256099942544/6300978111", new AdCallback() {
-            @Override
-            public void setOnPaidEventListener(AdValue adValue) {
-                super.setOnPaidEventListener(adValue);
-            }
-        });
+        AdmobManager.getInstance().loadBanner(this, "ca-app-pub-3940256099942544/6300978111");
         Log.d("android_log", "onCreate: SecondScreenActivity");
     }
 

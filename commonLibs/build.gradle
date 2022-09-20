@@ -53,4 +53,7 @@ dependencies {
         exclude group: 'androidx.core', module: 'core'
     }
 
+    implementation 'com.adjust.sdk:adjust-android:4.32.0'
+
+
 }

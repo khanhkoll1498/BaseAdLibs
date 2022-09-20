@@ -16,8 +16,10 @@ import com.common.control.interfaces.AdCallback;
 import com.google.android.gms.ads.AdActivity;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdValue;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.OnPaidEventListener;
 import com.google.android.gms.ads.appopen.AppOpenAd;
 
 import java.util.ArrayList;
@@ -240,6 +242,7 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
             if (fullScreenContentCallback != null) {
                 appResumeAd.setFullScreenContentCallback(fullScreenContentCallback);
             }
+            appResumeAd.setOnPaidEventListener(adValue -> AdmobManager.getInstance().trackRevenue(adValue));
             if (appResumeAd != null) {
                 appResumeAd.show(currentActivity);
             }

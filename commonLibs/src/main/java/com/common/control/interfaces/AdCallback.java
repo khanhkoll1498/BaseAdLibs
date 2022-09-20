@@ -44,7 +44,5 @@ abstract public class AdCallback {
     public void onUserEarnedReward(RewardItem rewardItem) {
 
     }
-    public void setOnPaidEventListener(AdValue adValue){
 
-    }
 }
