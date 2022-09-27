@@ -1,7 +1,8 @@
 
-## Edit a file
+## Implement API
+1.    implementation 'com.github.MTGLibs:CommonLibs:1.2.5'
 
-You’ll start by editing this README file to learn how to edit a file in Bitbucket.
+
 
 1. Click **Source** on the left side.
 2. Click the README.md link from the list of files.
