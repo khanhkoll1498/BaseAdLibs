@@ -6,6 +6,14 @@
 
 ```bash
   implementation 'com.github.MTGLibs:CommonLibs:1.2.5'
+  
+```
+- Add this tag in manifest
+```bash
+   <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${APP_ID}" />
+  
 ```
 
 ```bash
@@ -43,14 +51,14 @@
 ## Features
 
 - Load ad
-- Base structor
+- Base struct
 - Common Method
 
 ## Documentation
 
 [Policy Admob](https://support.google.com/admob/answer/6128543?hl=en)
 
-## Load a InterstialAd
+## Load a Interstitial
 
 **Request a Inter**
 
@@ -68,7 +76,7 @@
 **Show a Inter**
 
 ```bash
- AdmobManager.getInstance().showInterstitial(context, "YOUR_INTERSTIAL", new AdCallback() {
+ AdmobManager.getInstance().showInterstitial(context, "your_Interstitial", new AdCallback() {
                     @Override
                     public void onAdClosed() {
                         super.onAdClosed();
@@ -100,6 +108,30 @@
   place_holder);
 
 ```
+
+## Admob id test
+
+**APP_ID:**
+```bash
+ca-app-pub-3940256099942544~3347511713
+```
+**Banner:**
+```bash
+ca-app-pub-3940256099942544/6300978111
+```
+**Interstitial:**
+```bash
+ca-app-pub-3940256099942544/1033173712
+```
+**Native:**
+```bash
+ca-app-pub-3940256099942544/2247696110
+```
+**Open App:**
+```bash
+ca-app-pub-3940256099942544/3419835294
+```
+
 
 ## Note
 
