@@ -51,21 +51,26 @@ public class MainActivity extends AppCompatActivity {
 //                        Toast.makeText(MainActivity.this, "onPermissionDenied", Toast.LENGTH_SHORT).show();
 //                    }
 //                });
-//                SecondScreenActivity.start(MainActivity.this);
-//                AdmobManager.getInstance().showInterstitial(MainActivity.this, inter, null);
-
-                AdmobManager.getInstance().showRewardAd(MainActivity.this, rewardedAd, new AdCallback() {
+                AdmobManager.getInstance().showInterstitial(MainActivity.this, inter, new AdCallback() {
                     @Override
-                    public void onAdFailedToShowFullScreenContent(LoadAdError errAd) {
-                        super.onAdFailedToShowFullScreenContent(errAd);
-                    }
-
-                    @Override
-                    public void onUserEarnedReward(RewardItem rewardItem) {
-                        super.onUserEarnedReward(rewardItem);
-                        rewardedAd = null;
+                    public void onAdClosed() {
+                        super.onAdClosed();
+                        SecondScreenActivity.start(MainActivity.this);
                     }
                 });
+
+//                AdmobManager.getInstance().showRewardAd(MainActivity.this, rewardedAd, new AdCallback() {
+//                    @Override
+//                    public void onAdFailedToShowFullScreenContent(LoadAdError errAd) {
+//                        super.onAdFailedToShowFullScreenContent(errAd);
+//                    }
+//
+//                    @Override
+//                    public void onUserEarnedReward(RewardItem rewardItem) {
+//                        super.onUserEarnedReward(rewardItem);
+//                        rewardedAd = null;
+//                    }
+//                });
             }
         });
         PurchaseManager.getInstance().setCallback(new PurchaseCallback() {

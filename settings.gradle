@@ -9,4 +9,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "CommonLibs"
 include ':app'
-include ':commonLibs'
+include ':MTGLibs'

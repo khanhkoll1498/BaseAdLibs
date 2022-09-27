@@ -12,7 +12,17 @@ public class App extends MyApplication {
 
     @Override
     protected void onApplicationCreate() {
-        PurchaseManager.getInstance().init(this, Collections.singletonList(new PurchaseModel(PRODUCT_LIFETIME, PurchaseModel.ProductType.INAPP)));
+
+    }
+
+    @Override
+    protected boolean hasAdjust() {
+        return false;
+    }
+
+    @Override
+    protected String getAdjustAppToken() {
+        return null;
     }
 
     @Override
@@ -62,6 +72,6 @@ public class App extends MyApplication {
 
     @Override
     public List<PurchaseModel> getPurchaseList() {
-        return null;
+        return Collections.singletonList(new PurchaseModel(PRODUCT_LIFETIME, PurchaseModel.ProductType.INAPP));
     }
 }
