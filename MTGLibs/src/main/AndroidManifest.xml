@@ -20,6 +20,10 @@
             android:name=".dialog.PrepareLoadingAdsDialog"
             android:launchMode="singleTask"
             android:theme="@style/Transparent" />
+        <activity
+            android:name=".dialog.PrepareLoadingAdsWelcomeDialog"
+            android:launchMode="singleTask"
+            android:theme="@style/Transparent" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

@@ -38,7 +38,7 @@ public abstract class MyApplication extends Application {
         AppUtils.getInstance().setPolicyUrl(getPolicyUrl());
         AppUtils.getInstance().setEmail(getEmailSupport());
         AppUtils.getInstance().setSubject(getSubjectSupport());
-
+        AdmobManager.getInstance().setHasLog(true);
         if (isInitBilling()) {
             PurchaseManager.getInstance().init(this, getPurchaseList());
         }

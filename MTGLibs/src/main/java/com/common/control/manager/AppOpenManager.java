@@ -3,12 +3,12 @@ package com.common.control.manager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
@@ -49,6 +49,11 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
 
     private long loadTime;
     private WelcomeBackDialog dialog;
+    private long timeShowLoading = 100;
+
+    public void setTimeShowLoading(long timeShowLoading) {
+        this.timeShowLoading = timeShowLoading;
+    }
 
     public AppOpenAd getAppResumeAd() {
         return appResumeAd;
@@ -201,6 +206,7 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
         currentActivity = null;
     }
 
+
     public void showAdIfAvailable() {
         if (currentActivity != null && !AdmobManager.getInstance().isHasAds()) {
             return;
@@ -220,14 +226,15 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
                             // Set the reference to null so isAdAvailable() returns false.
                             AppOpenManager.this.appResumeAd = null;
                             isShowingAd = false;
-                            fetchAd();
-                            if (dialog != null) {
-                                dialog.dismiss();
-                            }
+//                            fetchAd();
+                            dismissDialogLoading();
                         }
 
                         @Override
                         public void onAdFailedToShowFullScreenContent(AdError adError) {
+                            dismissDialogLoading();
+                            AppOpenManager.this.appResumeAd = null;
+                            fetchAd();
                         }
 
                         @Override
@@ -236,57 +243,43 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
                         }
                     };
             showAdsWithLoading(fullScreenContentCallback);
-        } else {
-            Log.d(TAG, "Ad is not ready");
-            fetchAd();
+        }
+    }
+
+    private void dismissDialogLoading() {
+        try {
+            dialog.dismiss();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     private void showAdsWithLoading(FullScreenContentCallback fullScreenContentCallback) {
+        if (isShowingAd || appResumeAd == null) {
+            return;
+        }
         if (ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+            try {
+                dismissDialogLoading();
+                dialog = new WelcomeBackDialog(currentActivity);
+                dialog.show();
+            } catch (Exception e) {
+                dialog = null;
+                e.printStackTrace();
+            }
+            final Dialog finalDialog = dialog;
 
             if (fullScreenContentCallback != null) {
                 appResumeAd.setFullScreenContentCallback(fullScreenContentCallback);
             }
             appResumeAd.setOnPaidEventListener(adValue -> AdmobManager.getInstance().trackRevenue(adValue));
-            if (appResumeAd != null) {
-                long timeShowLoadingDlg = 0;
 
-                if (AdmobManager.getInstance().isShowLoadingDialog()) {
-                    dialog = WelcomeBackDialog.newInstance();
-                    dialog.showDialog((AppCompatActivity) currentActivity);
-                    timeShowLoadingDlg = AdmobManager.getInstance().getCustomTimeLoadingDialog();
-                }
-                new Handler().postDelayed(() -> {
+            new Handler().postDelayed(() -> {
+                if (dialog != null && dialog.isShowing()) {
                     AdmobManager.getInstance().log("Show OpenAd :" + appResumeAdId);
                     appResumeAd.show(currentActivity);
-                }, timeShowLoadingDlg);
-
-            }
-
-//            Dialog dialog = null;
-//            try {
-//                dialog = new PrepareLoadingAdsDialog(currentActivity);
-//                try {
-//                    dialog.show();
-//                } catch (Exception e) {
-//                    return;
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            final Dialog finalDialog = dialog;
-//            new Handler().postDelayed(() -> {
-//                if (fullScreenContentCallback != null) {
-//                    appResumeAd.setFullScreenContentCallback(fullScreenContentCallback);
-//                }
-//                if (appResumeAd != null) {
-//                    appResumeAd.show(currentActivity);
-//                }
-//                if (finalDialog != null) {
-//                    finalDialog.dismiss();
-//                }
-//            }, 800);
+                }
+            }, timeShowLoading);
         }
     }
 
