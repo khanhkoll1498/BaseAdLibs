@@ -60,6 +60,22 @@ public class AdmobManager {
     private boolean hasAdjust;
     private boolean hasLog;
 
+    public LoadAdError getErrAd() {
+        return errAd;
+    }
+
+    public boolean isShowLoadingDialog() {
+        return isShowLoadingDialog;
+    }
+
+    public void setHasAds(boolean hasAds) {
+        this.hasAds = hasAds;
+    }
+
+    public void setHasAdjust(boolean hasAdjust) {
+        this.hasAdjust = hasAdjust;
+    }
+
     public boolean isHasAds() {
         return hasAds;
     }
@@ -78,6 +94,10 @@ public class AdmobManager {
 
     public void setCustomTimeLoadingDialog(long customTimeLoadingDialog) {
         this.customTimeLoadingDialog = customTimeLoadingDialog;
+    }
+
+    public long getCustomTimeLoadingDialog() {
+        return customTimeLoadingDialog;
     }
 
     public void setShowLoadingDialog(boolean showLoadingDialog) {
@@ -170,6 +190,7 @@ public class AdmobManager {
                         super.onAdDismissedFullScreenContent();
                         if (callback != null) {
                             callback.onAdClosed();
+                            callback.onNextScreen();
                         }
                     }
 
@@ -178,6 +199,8 @@ public class AdmobManager {
                         super.onAdFailedToShowFullScreenContent(adError);
                         if (callback != null) {
                             callback.onAdClosed();
+                            callback.onNextScreen();
+
                         }
                     }
                 });
@@ -188,6 +211,7 @@ public class AdmobManager {
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 if (callback != null) {
                     callback.onAdClosed();
+                    callback.onNextScreen();
                 }
             }
         };
@@ -203,6 +227,7 @@ public class AdmobManager {
         if (mInterstitialAd == null || PurchaseManager.getInstance().isPurchased()) {
             if (callback != null) {
                 callback.onAdClosed();
+                callback.onNextScreen();
             }
             return;
         }
@@ -219,6 +244,7 @@ public class AdmobManager {
                 }
                 if (callback != null) {
                     callback.onAdClosed();
+                    callback.onNextScreen();
                 }
             }
 
@@ -230,6 +256,7 @@ public class AdmobManager {
                 context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
                 if (callback != null) {
                     callback.onAdClosed();
+                    callback.onNextScreen();
                 }
             }
 
@@ -258,6 +285,7 @@ public class AdmobManager {
         } else {
             if (callback != null) {
                 callback.onAdClosed();
+                callback.onNextScreen();
             }
         }
     }

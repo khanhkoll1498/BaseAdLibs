@@ -11,8 +11,11 @@ abstract public class AdCallback {
     public AdCallback() {
     }
 
-
+    @Deprecated
     public void onAdClosed() {
+    }
+
+    public void onNextScreen() {
     }
 
     public void onAdShowedFullScreenContent() {
@@ -25,9 +28,6 @@ abstract public class AdCallback {
     public void onAdLoaded() {
     }
 
-    @Deprecated
-    public void interCallback(InterstitialAd interstitialAd) {
-    }
 
     public void onResultInterstitialAd(InterstitialAd interstitialAd) {
     }

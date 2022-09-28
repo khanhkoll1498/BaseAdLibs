@@ -1,7 +1,6 @@
 package com.masterlibs.commonlibs;
 
 import com.common.control.MyApplication;
-import com.common.control.manager.PurchaseManager;
 import com.common.control.model.PurchaseModel;
 
 import java.util.Collections;
@@ -42,12 +41,12 @@ public class App extends MyApplication {
 
     @Override
     public boolean enableAdsResume() {
-        return false;
+        return true;
     }
 
     @Override
     public String getOpenAppAdId() {
-        return null;
+        return "ca-app-pub-3940256099942544/3419835294";
     }
 
     @Override

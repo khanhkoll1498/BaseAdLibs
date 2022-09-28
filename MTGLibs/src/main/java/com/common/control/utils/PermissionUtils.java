@@ -47,10 +47,9 @@ public class PermissionUtils {
                 .show();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public static void requestPermission(Activity activity, String... permission) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            activity.requestPermissions(permission, REQUEST_PERMISSION_ANY);
-        }
+        activity.requestPermissions(permission, REQUEST_PERMISSION_ANY);
     }
 
     public static boolean permissionGranted(Activity activity, String... permissions) {

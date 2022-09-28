@@ -4,14 +4,17 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
+import com.common.control.dialog.WelcomeBackDialog;
 import com.common.control.interfaces.AdCallback;
 import com.google.android.gms.ads.AdActivity;
 import com.google.android.gms.ads.AdError;
@@ -45,6 +48,7 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
     private final List<Class> disabledAppOpenList;
 
     private long loadTime;
+    private WelcomeBackDialog dialog;
 
     public AppOpenAd getAppResumeAd() {
         return appResumeAd;
@@ -149,7 +153,7 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
                 AppOpenManager.this.appResumeAd = null;
             }
         };
-        AdmobManager.getInstance().log("Request OpenAd :"+appResumeAdId);
+        AdmobManager.getInstance().log("Request OpenAd :" + appResumeAdId);
         AppOpenAd.load(
                 myApplication, appResumeAdId, request,
                 AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, loadCallback);
@@ -217,6 +221,9 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
                             AppOpenManager.this.appResumeAd = null;
                             isShowingAd = false;
                             fetchAd();
+                            if (dialog != null) {
+                                dialog.dismiss();
+                            }
                         }
 
                         @Override
@@ -243,8 +250,18 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
             }
             appResumeAd.setOnPaidEventListener(adValue -> AdmobManager.getInstance().trackRevenue(adValue));
             if (appResumeAd != null) {
-                AdmobManager.getInstance().log("Show OpenAd :"+appResumeAdId);
-                appResumeAd.show(currentActivity);
+                long timeShowLoadingDlg = 0;
+
+                if (AdmobManager.getInstance().isShowLoadingDialog()) {
+                    dialog = WelcomeBackDialog.newInstance();
+                    dialog.showDialog((AppCompatActivity) currentActivity);
+                    timeShowLoadingDlg = AdmobManager.getInstance().getCustomTimeLoadingDialog();
+                }
+                new Handler().postDelayed(() -> {
+                    AdmobManager.getInstance().log("Show OpenAd :" + appResumeAdId);
+                    appResumeAd.show(currentActivity);
+                }, timeShowLoadingDlg);
+
             }
 
 //            Dialog dialog = null;

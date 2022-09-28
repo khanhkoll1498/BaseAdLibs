@@ -42,7 +42,9 @@ public class PermissionSystemDialog extends AppCompatActivity {
             finish();
             return;
         }
-        PermissionUtils.requestPermission(this, permissions);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PermissionUtils.requestPermission(this, permissions);
+        }
     }
 
 

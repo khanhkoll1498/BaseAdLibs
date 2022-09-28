@@ -10,6 +10,7 @@ import android.view.Window;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.DialogFragment;
@@ -24,11 +25,11 @@ public abstract class BaseDialog<T extends ViewDataBinding> extends DialogFragme
         this.callback = callback;
     }
 
-    public void showDialog(BaseActivity activity) {
+    public void showDialog(AppCompatActivity activity) {
         show(activity.getSupportFragmentManager(), null);
     }
 
-    public void showDialog(BaseActivity activity, OnActionCallback callback) {
+    public void showDialog(AppCompatActivity activity, OnActionCallback callback) {
         setCallback(callback);
         show(activity.getSupportFragmentManager(), null);
     }
@@ -38,11 +39,16 @@ public abstract class BaseDialog<T extends ViewDataBinding> extends DialogFragme
     public final View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, getLayoutId(), container, false);
         if (getDialog() != null && getDialog().getWindow() != null) {
+
             getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+
         }
+        prepareDialog();
         return binding.getRoot();
     }
+
+    protected abstract void prepareDialog();
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

@@ -1,17 +1,22 @@
 package com.common.control.utils;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.StrictMode;
+import android.provider.OpenableColumns;
 import android.util.Log;
+
+import androidx.core.app.ShareCompat;
+import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -47,7 +52,7 @@ public class AppUtils {
     }
 
 
-    public void shareApp(Context context, String subject) {
+    public void shareApp(Context context) {
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         String shareBody =
@@ -148,15 +153,65 @@ public class AppUtils {
 
     public void shareFile(Context context, File file) {
         try {
-            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-            StrictMode.setVmPolicy(builder.build());
-            Intent intentShareFile = new Intent(Intent.ACTION_SEND);
-            intentShareFile.setType(URLConnection.guessContentTypeFromName(file.getName()));
-            intentShareFile.putExtra(Intent.EXTRA_STREAM,
-                    Uri.parse("file://" + file.getAbsolutePath()));
-            context.startActivity(Intent.createChooser(intentShareFile, "Share File"));
+            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
+            shareFile(context, uri);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void shareFile(Context context, Uri uri) {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        try {
+            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, "");
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getFileName(context, uri));
+            emailIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            emailIntent.setDataAndType(uri, "*/*");
+            emailIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            context.startActivity(emailIntent);
+        } catch (Exception ex) {
+            try {
+                Intent intent = ShareCompat.IntentBuilder.from((Activity) context).setType(context.getContentResolver().getType(uri)).setStream(uri).getIntent();
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                Intent createChooser = Intent.createChooser(intent, "Share File");
+                createChooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                if (createChooser.resolveActivity(context.getPackageManager()) == null) {
+                    return;
+                }
+                context.startActivity(createChooser);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
+    @SuppressLint("Range")
+    private String getFileName(Context context, Uri uri) {
+        String result = "";
+        try {
+            if (uri.getScheme().equals("content")) {
+                try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                    }
+                }
+            }
+            if (result == null) {
+                result = uri.getPath();
+                int cut = result.lastIndexOf('/');
+                if (cut != -1) {
+                    result = result.substring(cut + 1);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return result;
     }
+
 }
