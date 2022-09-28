@@ -262,7 +262,7 @@ public class AdmobManager {
 
             @Override
             public void onAdShowedFullScreenContent() {
-                context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
+//                context.sendBroadcast(new Intent(PrepareLoadingAdsDialog.ACTION_DISMISS_DIALOG));
                 if (callback != null) {
                     callback.onAdShowedFullScreenContent();
                 }
