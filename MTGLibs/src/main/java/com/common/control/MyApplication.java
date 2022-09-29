@@ -35,24 +35,26 @@ public abstract class MyApplication extends Application {
         }
         AdmobManager.getInstance().setShowLoadingDialog(isShowDialogLoadingAd());
 
-        AppUtils.getInstance().setPolicyUrl(getPolicyUrl());
-        AppUtils.getInstance().setEmail(getEmailSupport());
-        AppUtils.getInstance().setSubject(getSubjectSupport());
-        AdmobManager.getInstance().setHasLog(true);
+        AppConfig appConfig = getAppConfig();
+        AppUtils.getInstance().setAppConfig(appConfig);
+        AdmobManager.getInstance().setHasLog(appConfig.isShowLogIdAd());
+
         if (isInitBilling()) {
             PurchaseManager.getInstance().init(this, getPurchaseList());
         }
 
         if (hasAdjust()) {
-            AdmobManager.getInstance().hasAdjust(true);
-            String environment = BuildConfig.DEBUG ? AdjustConfig.ENVIRONMENT_SANDBOX : AdjustConfig.ENVIRONMENT_PRODUCTION;
-            AdjustConfig config = new AdjustConfig(this, getAdjustAppToken(), environment);
-            config.setLogLevel(LogLevel.VERBOSE);
-            //remove log
-//        config.setLogLevel(LogLevel.SUPRESS);
-            Adjust.onCreate(config);
-            registerActivityLifecycleCallbacks(new AdjustLifecycleCallbacks());
+            initAdjust();
         }
+    }
+
+    private void initAdjust() {
+        AdmobManager.getInstance().hasAdjust(true);
+        String environment = BuildConfig.DEBUG ? AdjustConfig.ENVIRONMENT_SANDBOX : AdjustConfig.ENVIRONMENT_PRODUCTION;
+        AdjustConfig config = new AdjustConfig(this, getAdjustAppToken(), environment);
+        config.setLogLevel(LogLevel.VERBOSE);
+        Adjust.onCreate(config);
+        registerActivityLifecycleCallbacks(new AdjustLifecycleCallbacks());
     }
 
 
@@ -94,7 +96,6 @@ public abstract class MyApplication extends Application {
 
     }
 
-
     protected abstract void onApplicationCreate();
 
     protected abstract boolean hasAdjust();
@@ -111,14 +112,9 @@ public abstract class MyApplication extends Application {
 
     protected abstract String getOpenAppAdId();
 
-    protected abstract String getPolicyUrl();
-
-    protected abstract String getSubjectSupport();
-
-    protected abstract String getEmailSupport();
-
     protected abstract boolean isInitBilling();
 
     protected abstract List<PurchaseModel> getPurchaseList();
 
+    protected abstract AppConfig getAppConfig();
 }

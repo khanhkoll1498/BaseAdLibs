@@ -78,7 +78,7 @@
 ```bash
  AdmobManager.getInstance().showInterstitial(context, "your_Interstitial", new AdCallback() {
                     @Override
-                    public void onAdClosed() {
+                    public void onNextScreen() {
                         super.onAdClosed();
                         SecondScreenActivity.start(context);
                     }

@@ -14,6 +14,8 @@ import android.util.Log;
 import androidx.core.app.ShareCompat;
 import androidx.core.content.FileProvider;
 
+import com.common.control.AppConfig;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -24,20 +26,15 @@ import java.util.TimeZone;
 public class AppUtils {
     private static AppUtils instance;
     private static final String TAG = AppUtils.class.getName();
-    private String policyUrl;
-    private String subject;
-    private String email;
 
-    public void setEmail(String email) {
-        this.email = email;
+    private AppConfig appConfig;
+
+    public void setAppConfig(AppConfig appConfig) {
+        this.appConfig = appConfig;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public void setPolicyUrl(String policyUrl) {
-        this.policyUrl = policyUrl;
+    public AppConfig getAppConfig() {
+        return appConfig;
     }
 
     private AppUtils() {
@@ -57,7 +54,7 @@ public class AppUtils {
         sharingIntent.setType("text/plain");
         String shareBody =
                 "https://play.google.com/store/apps/details?id=" + context.getPackageName();
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, appConfig.getSubjectShare());
         sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
         context.startActivity(Intent.createChooser(sharingIntent, "Share to"));
     }
@@ -65,7 +62,7 @@ public class AppUtils {
     public void support(Context context) {
         Intent mailIntent = new Intent(Intent.ACTION_VIEW);
         Uri data =
-                Uri.parse("mailto:?SUBJECT=" + subject + "&body=" + "" + "&to=" + email);
+                Uri.parse("mailto:?SUBJECT=" + appConfig.getSubjectSupport() + "&body=" + "" + "&to=" + appConfig.getEmailSupport());
         mailIntent.setData(data);
         context.startActivity(Intent.createChooser(mailIntent, "Send mail..."));
     }
@@ -89,7 +86,7 @@ public class AppUtils {
     }
 
     public void showPolicy(Context context) {
-        openWeb(context, policyUrl);
+        openWeb(context, appConfig.getPolicyUrl());
     }
 
     public void openWeb(Context context, String url) {

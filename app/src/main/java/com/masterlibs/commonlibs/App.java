@@ -1,5 +1,6 @@
 package com.masterlibs.commonlibs;
 
+import com.common.control.AppConfig;
 import com.common.control.MyApplication;
 import com.common.control.model.PurchaseModel;
 
@@ -49,20 +50,6 @@ public class App extends MyApplication {
         return "ca-app-pub-3940256099942544/3419835294";
     }
 
-    @Override
-    public String getPolicyUrl() {
-        return null;
-    }
-
-    @Override
-    protected String getSubjectSupport() {
-        return null;
-    }
-
-    @Override
-    protected String getEmailSupport() {
-        return null;
-    }
 
     @Override
     public boolean isInitBilling() {
@@ -72,5 +59,11 @@ public class App extends MyApplication {
     @Override
     public List<PurchaseModel> getPurchaseList() {
         return Collections.singletonList(new PurchaseModel(PRODUCT_LIFETIME, PurchaseModel.ProductType.INAPP));
+    }
+
+    @Override
+    protected AppConfig getAppConfig() {
+        return new AppConfig.AppConfigBuilder().setEmailSupport("email_support").setSubjectSupport("subject_sp").setPolicyUrl("policy_url")
+                .setSubjectShare("subject_share").build();
     }
 }
