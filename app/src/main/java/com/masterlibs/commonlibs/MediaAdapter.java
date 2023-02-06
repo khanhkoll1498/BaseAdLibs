@@ -5,8 +5,8 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.common.control.base.BaseAdapter;
-import com.common.control.base.BaseViewHolder;
+import com.master.prolibs.base.BaseAdapter;
+import com.master.prolibs.base.BaseViewHolder;
 import com.masterlibs.commonlibs.databinding.ActivityMainBinding;
 
 import java.util.List;

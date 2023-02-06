@@ -8,9 +8,8 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.common.control.interfaces.AdCallback;
-import com.common.control.manager.AdmobManager;
-import com.google.android.gms.ads.AdValue;
+import com.master.prolibs.base.CollapsibleType;
+import com.master.prolibs.manager.AdmobManager;
 
 public class SecondScreenActivity extends AppCompatActivity {
     public static void start(Context context) {
@@ -22,8 +21,8 @@ public class SecondScreenActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
-        AdmobManager.getInstance().loadNative(this, "ca-app-pub-3940256099942544/2247696110", findViewById(R.id.fr_ad), R.layout.custom_native_media);
-        AdmobManager.getInstance().loadBanner(this, "ca-app-pub-3940256099942544/6300978111");
+        AdmobManager.getInstance().loadNative(this, "ca-app-pub-3940256099942544/2247696110", findViewById(R.id.fr_native_ad), R.layout.custom_native_media);
+        AdmobManager.getInstance().loadBanner(this, "ca-app-pub-3940256099942544/6300978111", findViewById(R.id.fr_banner_ad), CollapsibleType.TOP);
         Log.d("android_log", "onCreate: SecondScreenActivity");
     }
 

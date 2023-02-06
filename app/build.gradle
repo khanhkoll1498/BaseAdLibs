@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.masterlibs.commonlibs"
         minSdk 22
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
     }
@@ -36,8 +36,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation project(':MTGLibs')
-    implementation 'com.google.android.gms:play-services-ads:21.2.0'
+    implementation project(':Admoblibs')
+    implementation 'com.google.android.gms:play-services-ads:21.5.0'
 
 
 }

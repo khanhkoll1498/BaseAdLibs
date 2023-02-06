@@ -10,14 +10,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.common.control.interfaces.AdCallback;
-import com.common.control.interfaces.PurchaseCallback;
-import com.common.control.manager.AdmobManager;
-import com.common.control.manager.PurchaseManager;
+import com.master.prolibs.interfaces.AdCallback;
+import com.master.prolibs.interfaces.PurchaseCallback;
+import com.master.prolibs.manager.AdmobManager;
+import com.master.prolibs.manager.PurchaseManager;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -52,10 +51,17 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                });
                 AdmobManager.getInstance().showInterstitial(MainActivity.this, inter, new AdCallback() {
+
+
                     @Override
-                    public void onAdClosed() {
-                        super.onAdClosed();
+                    public void onNextScreen() {
+                        super.onNextScreen();
                         SecondScreenActivity.start(MainActivity.this);
+                    }
+
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(LoadAdError errAd) {
+                        super.onAdFailedToShowFullScreenContent(errAd);
                     }
                 });
 
@@ -151,11 +157,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onAdFailedToLoad(LoadAdError i) {
                 super.onAdFailedToLoad(i);
-            }
-
-            @Override
-            public void onAdClosed() {
-                super.onAdClosed();
             }
         });
 

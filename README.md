@@ -4,11 +4,8 @@
   maven { url 'https://jitpack.io' }
 ```
 
-```bash
-  implementation 'com.github.MTGLibs:CommonLibs:1.2.5'
-  
-```
 - Add this tag in manifest
+
 ```bash
    <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -17,34 +14,59 @@
 ```
 
 ```bash
-  public class App extends MyApplication
+ public class App extends MyApplication {
+    public static final String PRODUCT_LIFETIME = "android.test.purchased";
 
-  @Override
+    @Override
+    protected void onApplicationCreate() {
+      // Not show Ad Resume With MainActivity
+      AppOpenManager.getInstance().disableAppResumeWithActivity(MainActivity.class);
+    }
+
+    //For Develop
+    @Override
     protected boolean hasAds() {
         return true;
     }
-  
 
-  @Override
-    protected boolean isShowAdsTest() {
-        return false;
-    }
-  
-
-  @Override
-    public boolean enableAdsResume() {
-        return false;
-    }
- 
-  @Override
-    public String getOpenAppAdId() {
-        return null;
-    }
- 
-  @Override
+    @Override
     protected boolean isShowDialogLoadingAd() {
         return true;
     }
+    
+    //Always show ad test when debuging
+    @Override
+    protected boolean isShowAdsTest() {
+        return BuildConfig.DEBUG;
+    }
+
+    @Override
+    public boolean enableAdsResume() {
+        return true;
+    }
+
+    @Override
+    public String getOpenAppAdId() {
+        return "ca-app-pub-3940256099942544/3419835294";
+    }
+
+
+    @Override
+    public boolean isInitBilling() {
+        return false;
+    }
+
+    @Override
+    public List<PurchaseModel> getPurchaseList() {
+        return Collections.singletonList(new PurchaseModel(PRODUCT_LIFETIME, PurchaseModel.ProductType.INAPP));
+    }
+
+    @Override
+    protected AppConfig getAppConfig() {
+        return new AppConfig.AppConfigBuilder().setEmailSupport("email_support").setSubjectSupport("subject_sp").setPolicyUrl("policy_url")
+                .setSubjectShare("subject_share").build();
+    }
+}
 
 ```
 
@@ -70,6 +92,11 @@
                         super.onResultInterstitialAd(interstitialAd);
                         // Admod result a InterstialAd. Save it to your cache to use.
                     }
+                    
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError i) {
+                    //TODO
+                   }
                 });
 ```
 
@@ -81,6 +108,10 @@
                     public void onNextScreen() {
                         super.onAdClosed();
                         SecondScreenActivity.start(context);
+                    }
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(LoadAdError errAd) {
+                        //TODO
                     }
                 });
 ```
@@ -106,32 +137,43 @@
 ```bash
  AdmobManager.getInstance().loadBanner(context, "native_id",
   place_holder);
+    
+ AdmobManager.getInstance().loadBanner(context, "native_id",
+  place_holder,collapsibleType);
 
 ```
 
 ## Admob id test
 
 **APP_ID:**
+
 ```bash
 ca-app-pub-3940256099942544~3347511713
 ```
+
 **Banner:**
+
 ```bash
 ca-app-pub-3940256099942544/6300978111
 ```
+
 **Interstitial:**
+
 ```bash
 ca-app-pub-3940256099942544/1033173712
 ```
+
 **Native:**
+
 ```bash
 ca-app-pub-3940256099942544/2247696110
 ```
+
 **Open App:**
+
 ```bash
 ca-app-pub-3940256099942544/3419835294
 ```
-
 
 ## Note
 

@@ -7,6 +7,6 @@ dependencyResolutionManagement {
         maven { url "https://jitpack.io" }
     }
 }
-rootProject.name = "CommonLibs"
+rootProject.name = "Admoblibs"
 include ':app'
-include ':MTGLibs'
+include ':Admoblibs'

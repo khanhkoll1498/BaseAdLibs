@@ -1,8 +1,11 @@
 package com.masterlibs.commonlibs;
 
-import com.common.control.AppConfig;
-import com.common.control.MyApplication;
-import com.common.control.model.PurchaseModel;
+import androidx.viewbinding.BuildConfig;
+
+import com.master.prolibs.AppConfig;
+import com.master.prolibs.MyApplication;
+import com.master.prolibs.manager.AppOpenManager;
+import com.master.prolibs.model.PurchaseModel;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,17 +15,7 @@ public class App extends MyApplication {
 
     @Override
     protected void onApplicationCreate() {
-
-    }
-
-    @Override
-    protected boolean hasAdjust() {
-        return false;
-    }
-
-    @Override
-    protected String getAdjustAppToken() {
-        return null;
+        AppOpenManager.getInstance().disableAppResumeWithActivity(MainActivity.class);
     }
 
     @Override
@@ -37,7 +30,7 @@ public class App extends MyApplication {
 
     @Override
     protected boolean isShowAdsTest() {
-        return false;
+        return BuildConfig.DEBUG;
     }
 
     @Override
@@ -52,7 +45,7 @@ public class App extends MyApplication {
 
 
     @Override
-    public boolean isInitBilling() {
+    public boolean hasPurchase() {
         return false;
     }
 
@@ -63,7 +56,6 @@ public class App extends MyApplication {
 
     @Override
     protected AppConfig getAppConfig() {
-        return new AppConfig.AppConfigBuilder().setEmailSupport("email_support").setSubjectSupport("subject_sp").setPolicyUrl("policy_url")
-                .setSubjectShare("subject_share").build();
+        return new AppConfig.AppConfigBuilder().setEmailSupport("email_support").setSubjectSupport("subject_sp").setPolicyUrl("policy_url").setSubjectShare("subject_share").build();
     }
 }
