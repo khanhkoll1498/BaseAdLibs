@@ -14,11 +14,13 @@ import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 
 
-abstract public class BaseFragment<T extends ViewDataBinding> extends Fragment implements View.OnClickListener {
+abstract public class BaseFragment<T extends ViewDataBinding, P extends BasePresenter> extends Fragment implements View.OnClickListener {
     protected Context context;
     protected View rootView;
     protected OnActionCallback callback;
     protected T binding;
+
+    protected P presenter;
 
     public void setCallback(OnActionCallback callback) {
         this.callback = callback;
@@ -41,7 +43,10 @@ abstract public class BaseFragment<T extends ViewDataBinding> extends Fragment i
         super.onViewCreated(view, savedInstanceState);
         initView();
         addEvent();
+        initPresenter();
     }
+
+    protected abstract void initPresenter();
 
     protected abstract int getLayoutId();
 

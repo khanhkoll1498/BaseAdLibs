@@ -10,8 +10,10 @@ import androidx.databinding.ViewDataBinding;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-public abstract class BaseActivity<T extends ViewDataBinding> extends BaseLanguageActivity {
+public abstract class BaseActivity<T extends ViewDataBinding, P extends BasePresenter> extends BaseLanguageActivity {
     protected T binding;
+
+    protected P presenter;
     private FirebaseAnalytics mFirebaseAnalytics;
     private Context context;
 
@@ -30,11 +32,10 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends BaseLangua
         initLanguage();
         binding = DataBindingUtil.setContentView(this, getLayoutId());
         binding.executePendingBindings();
+        initPresenter();
         initView();
         addEvent();
     }
-
-
 
     public void logEvent(String value) {
         try {
@@ -66,7 +67,7 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends BaseLangua
 
     protected abstract void addEvent();
 
-
+    protected abstract void initPresenter();
 }
 
 

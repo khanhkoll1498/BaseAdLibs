@@ -22,6 +22,10 @@ abstract public class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         this.context = context;
     }
 
+    public void updateList(List<T> list) {
+        this.mList = list;
+        notifyDataSetChanged();
+    }
 
     @NonNull
     @Override
@@ -47,8 +51,4 @@ abstract public class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
             return 0;
         }
     }
-
-
-
-
 }
