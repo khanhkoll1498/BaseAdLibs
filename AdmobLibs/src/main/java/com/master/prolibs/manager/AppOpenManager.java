@@ -4,9 +4,15 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -50,6 +56,22 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
     private long loadTime;
     private WelcomeBackDialog dialog;
     private long timeShowLoading = 100;
+
+    private String ACTION_DISMISS_NATIVE = "ACTION_DISMISS_NATIVE";
+    private String ACTION_SHOW_NATIVE = "ACTION_SHOW_NATIVE";
+
+    private FrameLayout frAd;
+
+    private BroadcastReceiver receiverShowAd = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_DISMISS_NATIVE)) {
+                frAd.setVisibility(View.GONE);
+            } else {
+                frAd.setVisibility(View.VISIBLE);
+            }
+        }
+    };
 
     public void setTimeShowLoading(long timeShowLoading) {
         this.timeShowLoading = timeShowLoading;
@@ -224,6 +246,8 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
                     isShowingAd = false;
 //                            fetchAd();
                     dismissDialogLoading();
+
+                    currentActivity.sendBroadcast(new Intent(ACTION_SHOW_NATIVE));
                 }
 
                 @Override
@@ -255,26 +279,34 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
             return;
         }
         if (ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-            try {
-                dismissDialogLoading();
-                dialog = new WelcomeBackDialog(currentActivity);
-                dialog.show();
-            } catch (Exception e) {
-                dialog = null;
-                e.printStackTrace();
-            }
-            final Dialog finalDialog = dialog;
+
+            /**Show background open app*/
+//            try {
+//                dismissDialogLoading();
+//                dialog = new WelcomeBackDialog(currentActivity);
+//                dialog.show();
+//            } catch (Exception e) {
+//                dialog = null;
+//                e.printStackTrace();
+//            }
+//            final Dialog finalDialog = dialog;
+//
+//            if (fullScreenContentCallback != null) {
+//                appResumeAd.setFullScreenContentCallback(fullScreenContentCallback);
+//            }
+//
+//            new Handler().postDelayed(() -> {
+//                if (dialog != null && dialog.isShowing()) {
+//                    AdmobManager.getInstance().log("Show OpenAd :" + appResumeAdId);
+//                    appResumeAd.show(currentActivity);
+//                }
+//            }, timeShowLoading);
 
             if (fullScreenContentCallback != null) {
                 appResumeAd.setFullScreenContentCallback(fullScreenContentCallback);
             }
-
-            new Handler().postDelayed(() -> {
-                if (dialog != null && dialog.isShowing()) {
-                    AdmobManager.getInstance().log("Show OpenAd :" + appResumeAdId);
-                    appResumeAd.show(currentActivity);
-                }
-            }, timeShowLoading);
+            appResumeAd.show(currentActivity);
+            currentActivity.sendBroadcast(new Intent(ACTION_DISMISS_NATIVE));
         }
     }
 
@@ -296,6 +328,14 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, L
         if (!currentActivity.getClass().getName().equals(AdActivity.class.getName())) {
             showAdIfAvailable();
         }
+    }
+
+    public void hideNativeOrBannerWhenShowOpenApp(Activity activity, FrameLayout frAd) {
+        this.frAd = frAd;
+        IntentFilter filterShowAd = new IntentFilter();
+        filterShowAd.addAction(ACTION_DISMISS_NATIVE);
+        filterShowAd.addAction(ACTION_SHOW_NATIVE);
+        activity.registerReceiver(receiverShowAd, filterShowAd);
     }
 }
 
